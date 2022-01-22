@@ -33,6 +33,10 @@ export function checkInput() {
     if(fs.existsSync(closedInputSpec)) {
         addToDo(`Please rename ${fileName} because there is already a closed input with that name.`)
     }
+    const closedLedgerSpec = makeCloseLedgerName(fileName)
+    if(fs.existsSync(closedLedgerSpec)) {
+        addToDo(`Please rename ${fileName} because there is already a closed ledger with that name.`)
+    }
 }
 
 export function checkChartOfAccounts() {
@@ -45,39 +49,16 @@ export function checkDescriptionMap() {
         addToDo(`Description map ${config.PATH_DESCRIPTON_MAP} is missing, did you run 'ts-node first-time'?`)
     }
 }
-
-    /*
-    // Check: ledger file exists
-    check = 'Working ledger exists: ' + WORK_FILE_LEDGER
-    if(!fs.existsSync(WORK_FILE_LEDGER)) {
-        checksNotOk.push(check)
-    } else {
-        checksOK.push(check)
+export function checkLedgerExists() {
+    if(!fs.existsSync(config.PATH_OPEN_LEDGER)) {
+        addToDo('There is no ledger file at: '+config.PATH_OPEN_LEDGER)
     }
+}
 
-
-    // Check: closed version of input cannot exist
-    const name_close_input = path.join(CLOSE_DIR_INPUT,inputFiles[0])
-    check = 'Input closed file does not exist: ' + name_close_input
-    if(fs.existsSync(name_close_input)) {
-        checksNotOk.push(check)
-    } else {
-        checksOK.push(check)
-    }
-
-    // Check: closed version of ledger cannot exist
-    const name_pieces = inputFiles[0].split('-')
-    name_pieces.shift() // lose the transform
-    const name_close_ledger = path.join(CLOSE_DIR_LEDGER,'ledger-' + name_pieces.join('-') + '.json')
-    check = 'Ledger closed file does not exist: ' + name_close_ledger
-    if(fs.existsSync(name_close_ledger)) {
-        checksNotOk.push(check)
-    } else {
-        checksOK.push(check)
-    }
-    */
-
-
-function makeCloseInputName(fileName:string) {
+export function makeCloseInputName(fileName:string) {
     return path.join(config.PATH_CLOSED_INPUTS,fileName)
+}
+export function makeCloseLedgerName(fileName:string) {
+    const jsonFileName = fileName.split('.')[0] + '.json'
+    return path.join(config.PATH_CLOSED_LEDGERS,jsonFileName)
 }

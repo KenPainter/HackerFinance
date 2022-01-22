@@ -37,8 +37,8 @@ function makeDir(dir:string) {
     }
 }
 const dirTree:{[key:string]: Array<string>} = {
-    "closed": [ 'inputs', 'ledger', 'reports'],
-    "open": [ 'input', 'shared', 'reports'],
+    "closed": [ 'inputs', 'ledgers', 'reports'],
+    "open": [ 'input', 'shared', 'reports', 'ledger'],
     "masters": [],
     "usr": [],
     "debug": []

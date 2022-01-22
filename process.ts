@@ -4,6 +4,9 @@
  * 
  * This is the main program for processing an open batch
  */
+// node imports
+import * as fs from 'fs'
+
 // Low-level utilities
 import { log } from './src/log'
 import { config } from './src/config'
@@ -26,6 +29,7 @@ import {
     Ledger
 } from './src/schema'
 import { inputsToLedger } from './src/inputsToLedger'
+import { fstat } from 'fs'
 
 // Process end 
 const doExit = () => {
@@ -84,7 +88,8 @@ if(haveToDo()) {
 }
 else {
     const ledger:Ledger = inputsToLedger(inputTransactions,chart)
-    dumpJSON('ledger',ledger)
+    fs.writeFileSync(config.PATH_OPEN_LEDGER,JSON.stringify(ledger,null,4))
+    
     const [ accountDetails, accountsFlat ] = tabulate(chart,ledger)
     dumpJSON('accountDetails',accountDetails)
     dumpJSON('accountsFlat',accountsFlat)

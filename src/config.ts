@@ -1,6 +1,7 @@
 interface Config {
     PATH_OPEN_INPUT: string
     PATH_OPEN_REPORTS: string
+    PATH_OPEN_LEDGER: string
     PATH_COA: string
     PATH_TODO: string
     PATH_CLOSED_INPUTS: string
@@ -24,6 +25,7 @@ export const config:Config = {
     // Directory Paths
     PATH_OPEN_INPUT: 'open/input/',
     PATH_OPEN_REPORTS: 'open/reports/',
+    PATH_OPEN_LEDGER: 'open/ledger/ledger.json',
 
     // File Paths
     PATH_COA: 'masters/chart-of-accounts.csv',
