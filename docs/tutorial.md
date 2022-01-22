@@ -590,7 +590,7 @@ it will ask us to specify what `BeginBalances` is.
 
 ```
 THERE ARE TO-DO ITEMS BEFORE THE BATCH CAN BE CLOSED
-To-do items are in  /home/ken/hacking/HackerFinance/open/to-do.txt
+To-do items are in  /path/to/HackerFinance/open/to-do.txt
 Here they are for handy reference:
  -> Chart of accounts: masters/chart-of-accounts.csv
     Account ",,BeginBalances" will need Group and Subgroup
@@ -702,7 +702,7 @@ that are unmapped:
 
 ```text
 THERE ARE TO-DO ITEMS BEFORE THE BATCH CAN BE CLOSED
-To-do items are in  /home/ken/hacking/HackerFinance/open/to-do.txt
+To-do items are in  /path/to/HackerFinance/open/to-do.txt
 Here they are for handy reference:
  -> 5 transactions are not yet mapped
  -> FYI: map multiple transactions by description in masters/match-by-description.csv
