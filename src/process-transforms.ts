@@ -20,6 +20,11 @@
  * FIELD: Account.  This is passed in, so just use that
  * 
  * FIELD: Date.  Must be 8 digit YYYYMMDD
+ *   If your credit card downloads contain two dates, use the
+ *   posting date, because the posting date determines what
+ *   statement the transaction will appear on.  Since the user
+ *   needs the statement to reconcile the balance, we have to
+ *   go by what shows up on the statement.
  * 
  * FIELD: Amount.  Always use function makeNumber()
  *   - for asset accounts like checking and savings, money coming in is positive
