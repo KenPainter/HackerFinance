@@ -17,8 +17,6 @@
  * 
  * Five fields must be provided:
  * 
- * FIELD: Account.  This is passed in, so just use that
- * 
  * FIELD: Date.  Must be 8 digit YYYYMMDD
  *   If your credit card downloads contain two dates, use the
  *   posting date, because the posting date determines what
@@ -31,6 +29,8 @@
  *   - for liability accounts like credit cards, spending is negative, payments are positive
  * 
  * FIELD: Description. Whatever is provided
+ * 
+ * FIELD: Account.  Use the first passed in parameter
  * 
  * FIELD: inpOffset, must be provided as an empty string
  * 

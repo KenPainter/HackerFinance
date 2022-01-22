@@ -99,7 +99,7 @@ else {
 
     log(1,'! There are no To-Do items !')
     log(1,`You can view statements in: ${config.PATH_OPEN_REPORTS}`)
-    log(1,"If you like the statments, close the batch by running 'ts-node close'")
+    log(1,"If you like the statements, close the batch by running 'ts-node close'")
 }
 
 doExit()
