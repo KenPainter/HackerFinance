@@ -40,7 +40,8 @@ const dirTree:{[key:string]: Array<string>} = {
     "closed": [ 'inputs', 'ledger', 'reports'],
     "open": [ 'input', 'shared', 'reports'],
     "masters": [],
-    "usr": []
+    "usr": [],
+    "debug": []
 }
 Object.keys(dirTree).forEach(dir=>{
     makeDir(dir)
