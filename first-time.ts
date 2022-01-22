@@ -7,6 +7,7 @@
  * would conflict with a simple .gitignore
  */
 import * as fs from 'fs'
+import * as path from 'path'
 import { config } from './src/config'
 
 const log = console.log
@@ -25,6 +26,28 @@ export const usrConfig:UsrConfig = {
     localeCurrencySpecifier: 'en-US',
     localeCurrencyOptions: {style:"currency", currency:"USD"}
 }`
+
+function makeDir(dir:string) {
+    if(!fs.existsSync(dir)) {
+        log("Creating directory ",dir,"(this directory is in .gitignore)")
+        fs.mkdirSync(dir)
+    }
+    else {
+        log("Directory already exists: ",dir)
+    }
+}
+const dirTree:{[key:string]: Array<string>} = {
+    "closed": [ 'inputs', 'ledger', 'reports'],
+    "open": [ 'input', 'shared', 'reports'],
+    "masters": [],
+    "usr": []
+}
+Object.keys(dirTree).forEach(dir=>{
+    makeDir(dir)
+    dirTree[dir].forEach(subdir=>{
+        makeDir(path.join(dir,subdir))
+    })
+})
 
 // Check: usrConfig
 if(!fs.existsSync(config.PATH_USRCONFIG)) {
