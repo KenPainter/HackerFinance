@@ -1,20 +1,33 @@
 /**
- * Responsibilities of a transform.
+ * transforms.ts
+ * This program is part of Hacker Finance
+ * Hacker Finance is licensed under GPL Affero Version 3
  * 
- * Overall, convert a row from an input into the Transaction interface
+ * To write a transform, look at any existing transform 
+ * (except manual, it's a bit different).  Copy and paste,
+ * rename it, and alter it.
  * 
- * Account: Passed in to the routine
- * Date: must be 8 digit YYYYMMDD (allows sorts and ranges using string comparisons)
- * amount: always use function makeNumber() which makes integer values to avoid 
- *         floating point arithmetic nonsense.  We divide / 100 when reporting
- *         reliably converts 123.45 to 12345
- *         reliably converts 123.4  to 12340
- *         reliably converts 123    to 12300
- * description: anything
+ * The transform name should be simple and easy to use
+ *  - the institution name, like Fidelity, Ameriprise, chase, BankOfAm etc
+ *  - the account type, typically 'Banking' or 'CC' for credit card
+ *  - examples are seen below, "chaseBanking", "chaseCC", "capOneCC"
  * 
- * NOTES ON POSITIVE/NEGATIVE NUMBERS
- *   For asset accounts: (banking, retirement, real estate, good), deposits are positive
- *   For liabilities     (revolving credit, loans), payments are positive, spend is negative
+ * The transform maps the downloaded input fields to the 
+ * InputTransaction interface (found in src/schema)
+ * 
+ * Five fields must be provided:
+ * 
+ * FIELD: Account.  This is passed in, so just use that
+ * 
+ * FIELD: Date.  Must be 8 digit YYYYMMDD
+ * 
+ * FIELD: Amount.  Always use function makeNumber()
+ *   - for asset accounts like checking and savings, money coming in is positive
+ *   - for liability accounts like credit cards, spending is negative, payments are positive
+ * 
+ * FIELD: Description. Whatever is provided
+ * 
+ * FIELD: inpOffset, must be provided as an empty string
  * 
  */ 
 
@@ -39,20 +52,6 @@ const dateFromMDY = (text:string):string => text.slice(-4) + text.slice(0,2) + t
 
 const makeNumber = (inp:string):number => {
     return Math.round(parseFloat(inp)*100)
-    /*
-    const pieces = inp.split('.')
-
-    // no decimal
-    if(pieces.length === 1) 
-        return parseInt(inp)*100
-
-    // short decimal, like 123.4
-    if(pieces[1].length === 1) 
-        return (parseInt(pieces[0])*100 ) + (parseInt(pieces[2])*10 )
-
-    // long decimal, like 123.40 or 123.04
-    return (parseInt(pieces[0])*100 ) + parseInt(pieces[1]) 
-    */
 }
 
 export const transforms = {
@@ -86,7 +85,6 @@ export const transforms = {
         return linesFromCSV(fileText)
             .map(line=> {
                 return {
-                    account: acct,
                     date: dateFromMDY(line[1]),
                     amount: makeNumber(line[5]),
                     description: line[2],
