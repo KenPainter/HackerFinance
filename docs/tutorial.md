@@ -448,7 +448,7 @@ Finally we have our income.  A good practice is to use the subgroup
 "W2" for any income that gets reported on a W2.  By the same idea you
 can have a group called "1099" (in the USA that is for self-employment).
 Plus of course income from capital gains, growth of retirement accounts
-and pension funds, dividens, and really anything else that applies.
+and pension funds, dividends, and really anything else that applies.
 
 Because J. Random Hacker is in the USA and had two regular salaried
 positions, we will put his take home pay in the "W2" subgroup, and
@@ -601,7 +601,7 @@ value.  To avoid a lengthy discourse,
 we are going with the practical idea that "BeginBalances" is exactly
 what it says, the balances of our accounts on the day before we
 started loading transactions to Hacker Finance.  So we put this into
-Equityi-Retained, which we will call for now, "Stuff I had before I started
+Equity-Retained, which we will call for now, "Stuff I had before I started
 using Hacker Finance."
 
 Our chart of Accounts should now look like this:
@@ -744,7 +744,7 @@ Asset,Cash,Savings
 ```
 
 Running `ts-node process` one last time says there are no to-do items,
-but we know we must check the trial balance in case mis-typed anything.
+but we know we must check the trial balance in case we mis-typed anything.
 If we typed everything correctly, the batch trial balance at
 `open/reports/trial-balance-0.txt` will look exactly like this:
 
@@ -901,8 +901,8 @@ Trial Balance Level 0
 Group                Debits        Credits Min Date   Max Date   Trx Count
 ------------ -------------- -------------- ---------- ---------- ---------
 Asset            $29,187.91                2020-12-31 2021-12-15        60
-Liability         $2,989.04                2021-01-05 2021-21-05        25
-Equity                           $8,000.00 2020-12-31 2021-12-31        35
+Liability                        $1,010.96 2021-01-05 2021-21-05        25
+Equity                           $4,000.00 2020-12-31 2021-12-31        35
 Income                          $39,041.52 2021-01-01 2021-12-15        24
 Expense          $14,864.57                2021-01-01 2021-21-05        26
 ------------ -------------- -------------- ---------- ---------- ---------
