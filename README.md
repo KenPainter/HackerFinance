@@ -50,12 +50,13 @@ Hacker Finance has these features:
   * Balance Sheet
   * Income Statement
   * Trial Balance
-  * Complete transaction dump
+* Complete detailed transaction listing
 * Currency format on statement is user-specified (en-US default)
 * One master file: the chart of accounts
 * A batch system for importing your transactions
-  * Remembers recurring transactions
+  * Remembers recurring transactions by descriptions (that you define)
   * Allows direct mapping of one-time transactions
+  * Special manual batches for increased flexibility
 
 Features I will probably get around to:
 * Date-filtered statements
@@ -72,10 +73,10 @@ I think it might be possible to learn Hacker Finance just
 by running `ts-node process` and checking off the
 "to-do" items that it presents to you.  
 
-But to be sure, I wrote [The User Guide](docs/userguide.md).
+But to be sure, I wrote [The User Guide](docs/user-guide.md).
 
 ## Contributing
 
 Contributions are welcome.  Hacker Finance is incredibly simple,
 there are no style guides or anything at all like that.  Just
-please if you want to add something don't break something else.
+please don't break anything that already works.
