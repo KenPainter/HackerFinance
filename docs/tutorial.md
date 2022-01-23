@@ -928,4 +928,10 @@ that would be tedious and
 not very informative.  So J Random Hacker uses the Hacker Finance
 feature of a manual batch to just enter the totals at the end of the year.
 
+To do this, we will open a manual batch:
+
+```bash
+ts-node open-manual
+```
+
 TO BE CONTINUED...
