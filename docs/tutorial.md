@@ -24,10 +24,9 @@ complex (and more useful) cases.  To achieve this, the tutorial
 walks us through a year in the life of J. Random Hacker, who:
 * (simple) has only one checking and one savings account 
 * (simple) has only one credit card
+* (more complicated) wants to record that the value of his
+car went down from the beginning of the year to the end.
 * (more complicated) changed jobs this year: two w-2s, two retirement accounts
-* (more complicated) traded in a car and wants to track the value
-  of the new car, including deprecation, retainage and interest on the
-  loan.
 
 ## Lesson 1: Checking Account
 
@@ -912,26 +911,297 @@ This is now a realistic picture of J Random Hackers finances for the
 year (understanding of course the tutorial files have far fewer transactions
 that a real live person would).
 
-## Lesson 4: Adding in Year-End Totals from Paycheck
+## Intermission: Debits and Credits
 
-In the USA we have a very complex payroll system in which we pay not
-just taxes at payroll time but also things like medical insurance,
-and payments to retirement accounts.  J Random Hacker wants to put
-these into Hacker
-Finance because it gives the complete picture of:
-* Take home pay, as entered in the checking account batches
-* Taxes, as taken from the W2
-* Other expenses that come out of an American's paycheck, like medical insurance
+We are about to enter two manual batches, and when we do it will
+be time to name the *Debit Account* and *Credit Account* for each
+transaction in the batch.
 
-However, J Random Hacker does not want to do these every two weeks,
-that would be tedious and
-not very informative.  So J Random Hacker uses the Hacker Finance
-feature of a manual batch to just enter the totals at the end of the year.
+This is very easy if you take a practical approach.  Remember only
+two things and you can figure out the rest, and after practice it
+becomes second nature.  The two things are:
 
-To do this, we will open a manual batch:
+> If I got/have something, I debit an asset account
+> Every debit has a matching credit
+
+If money came to me, I debit the asset account "Checking".  If
+somebody gives me a car, I debit the asset account "Vehicles".
+If I buy a car, I *still* debit the asset account "Vehicles."
+
+The only principle of double-entry bookeeping we need to know is
+that every debit has to have a matching credit.  So:
+
+* If money came to me as salary, I debit the asset account
+  "Checking", then I credit the source account: "Salary".
+  Or, as we did it in this tutorial, "TakeHome".
+* If I bought a car, I debit the asset account
+  "Vehicles", because the value of my vehicles went up by
+  the purchase price.  The credit is whereever the money
+  came from to buy the car:
+  * If I paid cash, I credit "Checking"
+  * If I financed the entire thing, I credit "AutoLoans"
+
+All other debits and credits can be deduced from there.
+
+## Lesson 4: Booking The Automobile
+
+Now we will see a simple manual batch - entering transactions that
+were not downloaded, and which add to the complete picture of 
+J Random Hacker's financial life.
+
+Our goals are to record the following facts:
+* At the beginning of 2021 J Random Hacker owned an automobile,
+  and the trade-in book value at the beginning of the year
+  was 10,000.
+* At the end of 2021 the car had *depreciated*, its trade-in
+  book value had dropped to 8000.
+
+To record these facts, we will open a manual batch:
 
 ```bash
 ts-node open-manual
 ```
 
-TO BE CONTINUED...
+This creates a file `open/input/manual-x-x.csv`, which we need
+to rename.  Like every input file, the first segment must name the
+transform, which is `manual`, but we can name the other two anything
+that makes sense that we're likely to remember when we see it two
+years from now, so we'll name it `open/input/manual-auto-2021.csv`
+
+We only need two transactions, and to enter them we need to know
+two bookeeping ideas.
+
+First, the value at the beginning of the year, 10,000, is an
+Asset value.  It is something owned by J Random Hacker.  But
+every transaction must name two accounts, so the offset is the
+same as the initial bank balances, it is the "BeginBalances"
+account, which is the account for *everything I owned before
+I started using Hacker Finance*.  
+
+In a manual batch we specify both the first account and the matching
+account together.  We also grow up a bit and name the first account
+the "Debit Account."  Remember the rule that "If I got/have something,
+I debit an Asset", and we can work out the transaction as:
+
+```csv
+Debit Account,Date,Amount,Credit Account,Description
+Vehicles,2021-01-01,10000,InitialBalances,Manually Entered Trade-in Book Value
+```
+
+In a second line we want to record that the value of the "Vehicles"
+account dropped to 8000 (went down by 2000) by the end of the year,
+so we know at 
+least it will start off like this:
+
+```csv
+Debit Account,Date,Amount,Credit Account,Description
+Vehicles,2021-01-01,10000,InitialBalances,Manually Entered Trade-in Book Value
+Vehicles,2021-12-31,-2000
+```
+
+A vehicle is an asset whose market value predictably goes down the longer
+you own it.  That reduction in value is called *depreciation*.  
+Depreciation is also called a non-cash expense.  It is an expense
+because it reduced your net worth.  It is non-cash because your net
+worth went down but you did not spend any money.  So we will
+finish the line as:
+
+```csv
+Debit Account,Date,Amount,Credit Account,Description
+Vehicles,2021-01-01,10000,InitialBalances,Manually Entered Trade-in Book Value
+Vehicles,2021-12-31,-2000,Depreciation,Manually Entered Auto Depreciation
+```
+
+When we run `ts-node process` we find that Hacker Finance is not telling
+us to match any transactions - which makes sense because we put the
+matching accounts directly into the input file.  But it does need us to
+finish off the the Group and Subgroup for the two new accounts
+we created.
+
+We know "Vehicles" is an asset account - something we own.  We already
+have a Subgroup "Cash" for bank accounts, so we need a Subgroup for
+non-cash property like vehicles and real estate.  Why not just call
+it "Property"?  This gives us:
+
+```csv
+Group,Subgroup,Account
+,,Depreciation
+Asset,Property,Vehicles
+```
+
+We know depreciation is an Expense, because it is a loss of 
+value.  But what Subgroup should it go into?  Why not just use the
+same Subgroup as we did for the asset, which is Property?  
+
+> Note: Account values must be unique, but Subgroups do not
+> have to be unique.  So you can only have one account in
+> the entire system named "Depreciation" or "Entertainment",
+> but you can have "Property" as a subgroup in each of the
+> five groups (if it makes sense to your needs)
+
+So we get:
+
+```csv
+Group,Subgroup,Account
+Expense,Property,Depreciation
+Asset,Property,Vehicles
+```
+
+When we run `ts-node process` Hacker Finance will tell us it is
+ready to close the batch.  Take a look at the statements if you
+like and close the batch when you are satisfied with them.
+
+## Lesson 5: Year End Paycheck Information
+
+Now we get to the last lesson (at least until I write the
+year-end closing routine, then that will become the last
+lesson).  This is another manual batch, and really demonstrates
+why I wrote Hacker Finance.
+
+In this tutorial we have seen the major features that motivated
+me to write this code for my own use:
+* Real financial statements: Balance Sheet and Income Statement 
+* Hacker-friendly way to automate repeating transactions
+* Hacker-friendly control over specific transactions
+* Hacker-friendly once-a-year batches for things like retirement accounts,
+  real estate, taxes, vehicles and depreciation.
+
+This last lesson is one of those year-end batches that takes five
+minutes to enter but really increases the completeness of the
+records and therefore increases the value of the whole exercise.
+
+If you go to a financial advisor or planner, they will usually
+ask you a trick question.  They ask, "What is your largest expense?"
+Most people answer, "Uh, My residence I suppose."  Then they zing
+you.  "Wrong!  Taxes!  Taxes are your largest expense.  If you
+do not have a strategy to mitigate your tax burden you are not
+in control of your expenses!"
+
+So in this final lesson we see how to make J Random Hacker's tax
+burden completely visible in black-and-white, using numbers I
+totally made up and vastly oversimplified.
+
+In previous lessons we recorded take home pay from Job # 2
+totalling $20,630.76.  Now we want to add in the rest of it:
+
+* All federal taxes withheld came to a nice round total of 4000.00
+* All state taxes withheld came to a nice round total of 1500.00
+* There were a total of 1200.00 deducted for medical insurance
+* There was a total of 8000.00 contributed to retirement accounts
+
+So we can do this is four entries in a manual batch.  We start
+by running
+
+```
+ts-node open-manual.ts
+```
+
+Rename the created file `manual-x-x.csv` to `manual-NewJob-2021_YearEnd.csv`.
+
+In a manual batch we are responsible for knowing about debits
+and credits, so we remember the rule:
+
+> If I got/have something, I debit an asset account
+> Every debit has a matching credit
+
+The easiest place to start is the 8000.00 contributed to the retirement
+account, that is something "I got/have" so we will debit an asset
+account.  We start the first line like this:
+
+```
+Debit Account,Date,Amount,Credit Account,Description
+401k/NewJob,2021-12-31,8000.00,????
+```
+
+The credit account will be "Withheld/NewJob", meaning all of the money
+paid in salary that did not go home, which finishes the line:
+
+```
+Debit Account,Date,Amount,Credit Account,Description
+401k/NewJob,2021-12-31,8000.00,Withheld/NewJob,Manual Sum 401k 2021
+```
+
+It should hopefully be clear that all of our transactions will have
+the same credit account, "Withheld/NewJob", because all of them are money
+paid in salary that went somewhere else instead of going home.
+
+As we get to make up any names we want for our accounts, we will make
+up descriptive names for Federal taxes, state taxes, and medical
+insurance, giving:
+
+```
+Debit Account,Date,Amount,Credit Account,Description
+401k/NewJob,2021-12-31,8000.00,Withheld/NewJob,Manual Sum 401k 2021
+Fed2021,2021-12-31,4000.00,Withheld/NewJob,Manual Sum 401k 2021
+State2021,2021-12-31,1500.00,Withheld/NewJob,Manual Sum 401k 2021
+Insurance/Med,2021-12-31,1200.00,Withheld/NewJob,Manual Sum 401k 2021
+```
+
+After we run `ts-node process` Hacker Finance needs us to specify
+the Group and Subgroups for the new accounts we have created.  We
+can figure that:
+* Withheld/New Job is an Income account in group W2, just like
+  the two TakeHome accounts we made up.
+* 401k/NewJob is an Asset account of type "Qualified", where
+  "Qualified" is a technical term that I will simply here to
+  mean retirement accounts covered by certain tax laws.
+* Both "Fed2021" and "State2021" are Expense accounts in
+  Subgroup Taxes
+* Finally "Insurance/Med" is an expense account.  We will
+  make up the Subgroup Health, on the idea that we may also
+  have Dental, Vision, and so forth in that group.
+
+This means we'll clean up the Chart of Accounts so the new
+accounts look like this:
+
+```csv
+iGroup,Subgroup,Account
+Asset,Qualified,401k/NewJob
+Expense,Taxes,Fed2021
+Expense,Health,Insurance/Med
+Expense,Taxes,State2021
+Income,W2,Withheld/NewJob
+```
+
+We should be able to run these three commands in a row:
+
+```bash
+ts-node process
+ts-node close
+ts-node statements
+```
+
+To wrap it up, the final benefit is having all expenses represented,
+which can be seen on the Level 2 Income Statement (most detailed):
+
+```
+Group           Subgroup        Account                 Debits 
+--------------- --------------- --------------- -------------- 
+Expense         Revolving       InterestCC             $210.96 
+Expense         Residence       Rent                $14,400.00 
+Expense         Lifestyle       Dining                 $198.14 
+Expense         Lifestyle       GoingOut                $55.47 
+Expense         Taxes           Fed2021              $4,000.00
+Expense         Taxes           State2021            $1,500.00
+Expense         Health          Insurance/Med        $1,200.00 
+Expense         Property        Depreciation         $2,000.00
+--------------- --------------- --------------- --------------
+                                                    $23,564.57               
+
+```
+
+## Final Comments
+
+If you'd like to continue practicing before going at it with your
+own data, here are some suggestions:
+* Make up a fake final paycheck for J Random Hacker's job from
+  the first half of the year
+* Make up a fake year-end statement for each of the retirement
+  accounts (one from each job), including
+  * Balance at beginning of 2021
+  * Contributions from J Random Hacker
+  * Contributions from employer
+  * Gains/Loss
+  * Fees
+* Add some real estate
+* Add some 1099 (self-employment) income 
