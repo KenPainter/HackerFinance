@@ -67,16 +67,8 @@ Features I will probably get around to:
 
 Everything is in [The tutorial](docs/tutorial.md).
 
-## Learn Without the Tutorial
-
-I think it might be possible to learn Hacker Finance just
-by running `ts-node process` and checking off the
-"to-do" items that it presents to you.  
-
-But to be sure, I wrote [The User Guide](docs/user-guide.md).
-
 ## Contributing
 
 Contributions are welcome.  Hacker Finance is incredibly simple,
-there are no style guides or anything at all like that.  Just
-please don't break anything that already works.
+there are no style guides or rules, except to please not break
+anything.
