@@ -2,12 +2,12 @@
  * first-time.ts
  * This file is part of Hacker Finance
  * 
- * Create all files you need to get started.
- * These files are not put into the repo because that
- * would conflict with a simple .gitignore
+ * Version 1.0 complete 2022-01-25
+ * 
  */
 import * as fs from 'fs'
 import { config } from './src/config'
+import { logDetail, logTitle } from './src/log'
 
 const log = console.log
 
@@ -26,13 +26,15 @@ export const usrConfig:UsrConfig = {
     localeCurrencyOptions: {style:"currency", currency:"USD"}
 }`
 
+logTitle("PROCESS BEGIN: First time setup")
+
 function makeDir(dir:string) {
     if(!fs.existsSync(dir)) {
-        log("Creating directory ",dir,"(this directory is in .gitignore)")
+        logDetail("Creating directory ",dir,"(this directory is in .gitignore)")
         fs.mkdirSync(dir)
     }
     else {
-        log("Directory already exists: ",dir)
+        logDetail("Directory already exists: ",dir)
     }
 }
 
@@ -46,27 +48,29 @@ makeDir('data/5-imported-inputs')
 
 // Check: usrConfig
 if(!fs.existsSync(config.FILE_MASTER_USER_CONFIG)) {
-    log("Creating file:",config.FILE_MASTER_USER_CONFIG)
+    logDetail("Creating file:",config.FILE_MASTER_USER_CONFIG)
     fs.writeFileSync(config.FILE_MASTER_USER_CONFIG, text_usrConfig)
 } 
 else {
-    log("File already exists: ",config.FILE_MASTER_USER_CONFIG)
+    logDetail("File already exists: ",config.FILE_MASTER_USER_CONFIG)
 }
 
 // Check: Chart of Accounts
 if(!fs.existsSync(config.FILE_MASTER_COA)) {
-    log("Creating file:",config.FILE_MASTER_COA)
+    logDetail("Creating file:",config.FILE_MASTER_COA)
     fs.writeFileSync(config.FILE_MASTER_COA,text_COA)
 } 
 else {
-    log("File already exists: ",config.FILE_MASTER_COA)
+    logDetail("File already exists: ",config.FILE_MASTER_COA)
 }
 
 // Check: Description Map 
 if(!fs.existsSync(config.FILE_MASTER_DESCRIPTION_MAP)) {
-    log("Creating file:",config.FILE_MASTER_DESCRIPTION_MAP)
+    logDetail("Creating file:",config.FILE_MASTER_DESCRIPTION_MAP)
     fs.writeFileSync(config.FILE_MASTER_DESCRIPTION_MAP,'Credit Account,Description')
 } 
 else {
-    log("File already exists: ",config.FILE_MASTER_DESCRIPTION_MAP)
+    logDetail("File already exists: ",config.FILE_MASTER_DESCRIPTION_MAP)
 }
+
+logTitle("PROCESS COMPLETE: First time setup")
