@@ -9,6 +9,7 @@ import * as fs from 'fs'
 // Utility imports
 import { Inputs } from './schema'
 import { config } from './config'
+import { logDetail } from './log'
 
 export function transactionMapCount(loadClosed:boolean=false):number {
     const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
@@ -20,6 +21,7 @@ export function transactionMapCount(loadClosed:boolean=false):number {
 
 export function loadTransactionMap(loadClosed:boolean=false):Inputs {
     const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
+    logDetail('Loading transaction map ',fileSpec)
 
     const lines= fs.readFileSync(fileSpec,'utf8')
         .split('\n')
@@ -45,6 +47,7 @@ const HEADER = 'Credit Account,Debit Account,Date,Amount,Description,Source\n'
 
 export function appendTransactionMap(trxs:Inputs,closedVersion:boolean=false) {
     const fileSpec = !closedVersion ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
+    logDetail('Appending to transaction map ',fileSpec)
     if(!fs.existsSync(fileSpec)) {
         fs.writeFileSync(fileSpec,HEADER)
     }
@@ -55,6 +58,7 @@ export function appendTransactionMap(trxs:Inputs,closedVersion:boolean=false) {
 
 export function replaceTransactionMap(trxs:Inputs) {
     // In replace mode we unconditionally replace the file
+    logDetail('Overwriting transaction map ',config.FILE_OPEN_TRANSACTION_MAP)
     fs.writeFileSync(config.FILE_OPEN_TRANSACTION_MAP,HEADER)
     appendTransactionMap(trxs)
 }

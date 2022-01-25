@@ -1,12 +1,14 @@
 import * as fs from 'fs'
 
 import { config } from './config'
+import { logDetail } from './log';
 
 import { DescriptionCounts, DescriptionMap } from './schema';
 
 export function writeUnMatchedDescriptions(descs:DescriptionCounts) {
     const keys = Object.keys(descs).sort()
     const lines = keys.map(key=>`,${key}(${descs[key]})`)
+    logDetail("Writing back open batch description map",config.FILE_OPEN_DESCRIPTION_MAP)
     fs.writeFileSync(config.FILE_OPEN_DESCRIPTION_MAP,
         'CrdAccount,Description\n'
         + lines.join('\n')
@@ -16,6 +18,7 @@ export function writeUnMatchedDescriptions(descs:DescriptionCounts) {
 export function writeDescriptionMap(descriptionMap:DescriptionMap) {
     const keys = Object.keys(descriptionMap).sort()
     const lines = keys.map(key=>`${descriptionMap[key]},${key}`)
+    logDetail("Writing back master description map",config.FILE_MASTER_DESCRIPTION_MAP)
     fs.writeFileSync(config.FILE_MASTER_DESCRIPTION_MAP,
         'CrdAccount,Description\n'
         + lines.join('\n')
@@ -25,7 +28,11 @@ export function writeDescriptionMap(descriptionMap:DescriptionMap) {
 export function loadDescriptionMap():DescriptionMap {
     const retval = {}
     const master = loadOne(config.FILE_MASTER_DESCRIPTION_MAP,retval)
+    const masterCount = Object.keys(retval).length
     const open = loadOne(config.FILE_OPEN_DESCRIPTION_MAP,retval) 
+    const openCount = Object.keys(retval).length - masterCount
+    logDetail(`Loaded ${masterCount} descriptions from ${config.FILE_MASTER_DESCRIPTION_MAP}`)
+    logDetail(`Loaded ${openCount} descriptions from ${config.FILE_OPEN_DESCRIPTION_MAP}`)
     return retval
 }
 

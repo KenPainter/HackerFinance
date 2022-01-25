@@ -6,7 +6,7 @@
 
 // Utility imports
 import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './schema';
-import { logGood, logInfo } from './log';
+import { logBlank, logConclusion, logDetail } from './log';
 import { config } from './config';
 
 // Functional imports
@@ -74,10 +74,10 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     if(newAccounts.length > 0) {
         newAccounts.sort()
         writeChartOfAccounts(accountsMap,newAccounts)
-        logInfo(newAccounts.length.toString() + " new accounts discovered and added to chart of account ",
-            config.FILE_MASTER_COA,
-            ...newAccounts
-        )
+        logBlank()
+        logDetail(newAccounts.length,"New accounts added to chart of accounts",config.FILE_MASTER_COA)
+        newAccounts.forEach(act=>logDetail("New account ",act))
+        logBlank()
     }
 
     // Pull out the statistics to report
@@ -121,8 +121,7 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
         appendTransactionMap(completeTrxs,true)
         // now run reports on all transactions
         const closedTrx = loadTransactionMap(true)
-        logGood()
-        logGood("Moved complete transactions to closed transaction map")
+        logConclusion("Moved complete transactions to closed transaction map")
         console.log('   Total number of currently closed transactions:',closedTrx.length.toLocaleString())
         const [ aT, aF ] = tabulate(accountsMap,closedTrx)
         let statement2 = new Statement(aT,aF)
@@ -130,8 +129,7 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     }
 
     // Report out the numbers
-    logGood('')
-    logGood('All Processing is complete')
+    logConclusion('All Processing is complete')
     console.log('   Total transactions in transactionMap:',trxTotal)
     console.log('  Transactions with incomplete accounts:',trxPartial)
     console.log('            Transactions ready to close:',trxComplete)

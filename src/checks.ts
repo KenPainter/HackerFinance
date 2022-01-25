@@ -7,15 +7,15 @@
 import * as fs from 'fs'
 
 import { config } from './config'
-import { logBad } from './log'
+import { logBadNews } from './log'
 
 export function runChecks() {
     if(!fs.existsSync(config.FILE_MASTER_COA)) {
-        logBad(`Chart of accounts ${config.FILE_MASTER_COA} is missing, did you run 'ts-node first-time'?`)
+        logBadNews(`Chart of accounts ${config.FILE_MASTER_COA} is missing, did you run 'ts-node first-time'?`)
         return false
     }
     if(!fs.existsSync(config.FILE_MASTER_DESCRIPTION_MAP)) {
-        logBad(`Description map ${config.FILE_MASTER_DESCRIPTION_MAP} is missing, did you run 'ts-node first-time'?`)
+        logBadNews(`Description map ${config.FILE_MASTER_DESCRIPTION_MAP} is missing, did you run 'ts-node first-time'?`)
         return false
     }
     return true

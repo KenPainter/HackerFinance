@@ -2,11 +2,12 @@ import * as fs from 'fs'
 
 import { AccountMap  } from './schema'
 import { config } from './config';
-import { logWarn } from './log'
+import { logDetail, logWarnings } from './log'
 
 // Note that checks should have already been run
 // before calling this function
 export function loadChartOfAccounts():AccountMap {
+    logDetail("Loading chart of accounts: ",config.FILE_MASTER_COA)
     let accountMap:AccountMap = {}
     let warnings:Array<string> = []
     fs.readFileSync(config.FILE_MASTER_COA,'utf8')
@@ -39,7 +40,7 @@ export function loadChartOfAccounts():AccountMap {
         })
         if(warnings.length > 0) {
             const warnLine = warnings.length.toString() + ' lines were dropped while loading chart of accounts'
-            logWarn(warnLine,config.FILE_MASTER_COA,...warnings)
+            logWarnings(warnLine,...warnings)
         }
 
     return accountMap

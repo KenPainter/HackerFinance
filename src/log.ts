@@ -23,6 +23,13 @@ export const logBlank = () =>  console.log("")
 
 export const logDetail = (...args) => console.log(SPACE,SPACE,chalk.white(...args))
 
+export const logWarnings = (...args) => {
+    logBlank()
+    console.log(SPACE,chalk.yellow(args[0]))
+    args.slice(1).forEach(arg=>console.log(SPACE,SPACE,arg))
+    logBlank()
+}
+
 export const logCurrency = (arg:number) => formatCurrency(arg)
 
 
