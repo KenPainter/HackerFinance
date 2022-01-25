@@ -8,33 +8,31 @@ Modern personal finance sites and apps do three things for you:
   and "Entertainment".  
 * Show colorful charts detailing your expenses
 
-When I tried to use a few of these apps I found I always ended up
+When I tried to use a few of these cheap/free apps I always ended up
 spending most of my time in a clumsy UI trying to fix the mappings into
 categories that are more useful to me.
 
-So it occurred to me that if I were going to spend that time on the
-mapping, I'd rather do it in a code editor, and 
-as I don't need the colorful charts and can code up financial
-statements, I would just do it myself.  The result is Hacker Finance.
+So I decided if I were going to spend the time on the mapping,
+I'd rather do it in a code editor.  I don't need the colorful
+charts (though perhaps they would be fun to do later) and 
+am comfortable coding up financial statements, so I decided
+to create for myself Hacker Finance.
 
-## It's Not For You If...
-
-If you are happy with the way that mainstream apps categorize
-your transactions then you probably do not want to use Hacker Finance, as
-Hacker Finance makes you do all of that work yourself.  Hacker Finance
-assumes you *want* to do that work to get the correct mappings for your
-personal purposes.
+Hacker Finance is hacker-friendly, a small set of tools are meant
+to support the user's imagination in creating a complete financial
+picture to any arbitrary level of complexity and detail.
 
 ## It Might Be For You If...
 
 Hacker Finance attempts to provide an optimized solution to the
-problem of personal finance under the following conditions:
+problem of personal finance for hackers:
 * The user is not satisfied with the ability of free/cheap
   personal finance apps to categorize their transactions
 * The user wishes to have a complete picture of their finances
   including, if desired, taxes, vehicles, depreciation, real estate
   and so on
 * The user is a hacker:
+    * will dream up their own way to use a flexible set of tools
     * expects full control of their data
     * is fine with downloading some files from their bank
     * is comfortable with a CLI
@@ -44,28 +42,49 @@ problem of personal finance under the following conditions:
 
 ## Features
 
-Hacker Finance has these features:
+Hacker Finance has exactly the features I wanted for myself,
+and as of this writing I'm the only contributor so here they are:
 
-* Three standard statement, each at three levels of detail:
-  * Balance Sheet
-  * Income Statement
-  * Trial Balance
-* Complete detailed transaction listing
-* Currency format on statement is user-specified (en-US default)
-* One master file: the chart of accounts
-* A batch system for importing your transactions
-  * Remembers recurring transactions by descriptions (that you define)
-  * Allows direct mapping of one-time transactions
-  * Special manual batches for increased flexibility
+Outputs:
+* Balance Sheet at 3 different levels of detail
+* Income Statement at 3 different levels of detail
+* Trial Balance at 3 different levels of detail
+* All outputs at working batch level and at global level
+* Detailed transaction listtings for reconciling
 
-Features I will probably get around to:
-* Date-filtered statements
+Inputs:
+* A flexible "transform" system to make it easier for
+  the next user to extend Hacker Finance for the format their
+  bank provides.  Transforms available at this writing:
+  * JP Morgan Chase CSV files for checking and savings
+  * JP Morgan Chase CSV files for credit cards
+  * Capital One CSV files for credit cards
+  * Manually created CSV input files
+
+Workflow:
+* A basic build-as-you-go approach.  Real statements do
+  require a chart of accounts, but you add accounts only
+  as you work through transactions.
+* A few basic checks to make sure we don't shoot ourselves
+  in the foot by double-importing a file or anything like that.
+* High visibility of the status of your working set.  As I
+  use it myself I imported over 3000 transactions (all of 2021 from
+  multiple sources) and had no trouble keeping everything straight.
+* Automated mapping of repeating and recurring transactions, 
+  with a permanent memory of the rules.  Which of course you can
+  go change any time you want for any reason.
+* Some basic UNDO if you munge your working set and want to
+  start over.
+
+Features I will definitely get around to
+* Date-filtered statements (probably automatically by year)
 * Year-end rollup 
 * (maybe someday) nice HTML reports
 
 ## Learn By Following the Tutorial
 
-Everything is in [The tutorial](docs/tutorial.md).
+I refactored all the code after writing the tutorial, so I have
+to rewrite it :(
 
 ## Contributing
 
