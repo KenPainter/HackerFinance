@@ -1,10 +1,53 @@
 import * as fs from 'fs'
 
-import { addToDoTwo } from './todo'
+import { config } from './config'
+
+import { DescriptionCounts, DescriptionMap } from './schema';
+
+export function writeUnMatchedDescriptions(descs:DescriptionCounts) {
+    const keys = Object.keys(descs).sort()
+    const lines = keys.map(key=>`,${key}(${descs[key]})`)
+    fs.writeFileSync(config.FILE_OPEN_DESCRIPTION_MAP,
+        'CrdAccount,Description\n'
+        + lines.join('\n')
+    )
+}
+
+export function writeDescriptionMap(descriptionMap:DescriptionMap) {
+    const keys = Object.keys(descriptionMap).sort()
+    const lines = keys.map(key=>`${descriptionMap[key]},${key}`)
+    fs.writeFileSync(config.FILE_MASTER_DESCRIPTION_MAP,
+        'CrdAccount,Description\n'
+        + lines.join('\n')
+    )
+}
+
+export function loadDescriptionMap():DescriptionMap {
+    const retval = {}
+    const master = loadOne(config.FILE_MASTER_DESCRIPTION_MAP,retval)
+    const open = loadOne(config.FILE_OPEN_DESCRIPTION_MAP,retval) 
+    return retval
+}
+
+function loadOne(fileSpec:string,retval:DescriptionMap) {
+    const lines = fs.readFileSync(fileSpec ,'utf8')
+        .split('\n')
+        .slice(1)
+        .filter(line=>line.length > 0 && !line.startsWith(','))
+        .map(line=>line.split(',').map(each=>each.trim()))
+        .filter(line=>line.length ===2 && line[1].length >= 3)
+
+    for(const line of lines) {
+        retval[line[1]] = line[0]
+    }
+}
+
+
+/*
 import { log } from './log'
 import { config } from './config'
 
-import { DescriptionMap, TransactionMap, Inputs, Chart } from './schema'
+import { DescriptionMap } from './schema'
 
 
 // All checks should have passed, this program has no checks
@@ -137,3 +180,4 @@ export function writeTransactionMap(inpTrxs:Inputs) {
 
     fs.writeFileSync(config.PATH_TRANSACTION_MAP,text)
 }
+*/

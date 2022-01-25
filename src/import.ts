@@ -47,5 +47,12 @@ export function importInputs() {
         fs.renameSync(fileSpec,movedSpec)
     })
 
+    inputs.sort((a,b)=>{
+        if(a.date > b.date) return 1
+        if(a.date < b.date) return -1
+        if(a.description > b.description) return 1
+        if(a.description < b.description) return -1
+    })
+
     appendTransactionMap(inputs)
 }

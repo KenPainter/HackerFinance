@@ -5,7 +5,7 @@
  */
 
 // Utility imports
-import { AccountMap, Inputs, InputTransaction } from './schema';
+import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './schema';
 import { logGood, logInfo } from './log';
 import { config } from './config';
 
@@ -13,6 +13,8 @@ import { config } from './config';
 import { runChecks } from './checks'
 import { loadChartOfAccounts, writeChartOfAccounts } from './chartOfAccounts';
 import { appendTransactionMap, loadTransactionMap, replaceTransactionMap } from './transactionMap';
+import { loadDescriptionMap, writeDescriptionMap, writeUnMatchedDescriptions } from './descriptionMap';
+import { match } from './match'
 import { tabulate } from './tabulate'
 import { Statement } from './Statement'
 
@@ -30,7 +32,27 @@ export function processOpen(closeThemUp:boolean = false) {
     // Load the transactionMap as best as we have it
     const transactionMap:Inputs = loadTransactionMap()
 
-    // Match logic goes here, pulls in new accounts
+    // Load permanent and current description maps
+    const descriptionMap:DescriptionMap = loadDescriptionMap()
+
+    // Match by descriptions happen here, if we can find any
+    match(transactionMap,descriptionMap)
+
+    // compile the descriptions for unmatched and matched trxs
+    let uDescriptions:Array<string> = []
+    let uDescriptionCounts:{[key:string]:number} = {}
+    transactionMap.forEach(trx=>{
+        if(trx.crdAccount==='') {
+            if(!(trx.crdAccount in uDescriptionCounts)) {
+                uDescriptionCounts[trx.description] = 0
+                uDescriptions.push(trx.description)
+            }
+            uDescriptionCounts[trx.description]++
+        } 
+    })
+    // Immediately write this file, as we no longer will be using it
+    writeUnMatchedDescriptions(uDescriptionCounts)
+    writeDescriptionMap(descriptionMap)
 
     // Look for new accounts and report them
     const newAccounts:Array<string> = []
@@ -55,8 +77,6 @@ export function processOpen(closeThemUp:boolean = false) {
             ...newAccounts
         )
     }
-
-    // Write back the transactionMap after match logic
 
     // Pull out the statistics to report
     let trxTotal:number = 0

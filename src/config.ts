@@ -6,6 +6,8 @@ interface Config {
     FILE_OPEN_TRANSACTION_MAP: string
     FILE_CLOSED_TRANSACTION_MAP: string
 
+    FILE_OPEN_DESCRIPTION_MAP: string
+
     FILE_MASTER_USER_CONFIG: string
     FILE_MASTER_COA: string
     FILE_MASTER_DESCRIPTION_MAP: string
@@ -29,6 +31,8 @@ export const config:Config = {
     PATH_OPEN_BATCH: 'data/2-open-batch',
     FILE_OPEN_TRANSACTION_MAP: 'data/2-open-batch/transactionMap.csv',
     FILE_CLOSED_TRANSACTION_MAP: 'data/3-closed-batches/closed-transactionMap.csv',
+
+    FILE_OPEN_DESCRIPTION_MAP: 'data/2-open-batch/unUsedDescriptionMap.csv',
 
     // Masters
     FILE_MASTER_USER_CONFIG: 'data/0-masters/usrConfig.ts',

@@ -9,6 +9,11 @@ export interface InputTransaction {
     srcFile: string
 }
 
+// Description map
+export type DescriptionMap = {[key:string]:Account}
+export type DescriptionCounts= {[key:string]:number};
+
+
 // Related to Chart of Accounts
 export type Group = string
 export type Subgroup = string
