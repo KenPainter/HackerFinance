@@ -13,6 +13,9 @@ import { logDetail } from './log'
 
 export function transactionMapCount(loadClosed:boolean=false):number {
     const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
+    if(!fs.existsSync(fileSpec)) {
+        return 0
+    }
     return fs.readFileSync(fileSpec,'utf8')
         .split('\n')
         .slice(1)
@@ -43,7 +46,7 @@ export function loadTransactionMap(loadClosed:boolean=false):Inputs {
         })
 }
 
-const HEADER = 'Credit Account,Debit Account,Date,Amount,Description,Source\n'
+const HEADER = 'Credit Account,Debit Account,Date,Amount,Description,Source'
 
 export function appendTransactionMap(trxs:Inputs,closedVersion:boolean=false) {
     const fileSpec = !closedVersion ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
@@ -52,7 +55,7 @@ export function appendTransactionMap(trxs:Inputs,closedVersion:boolean=false) {
         fs.writeFileSync(fileSpec,HEADER)
     }
     fs.appendFileSync(fileSpec,
-        trxs.map(x=>`${x.crdAccount},${x.debAccount},${x.date},${x.amount},${x.description},${x.srcFile}`).join('\n')
+        '\n'+trxs.map(x=>`${x.crdAccount},${x.debAccount},${x.date},${x.amount},${x.description},${x.srcFile}`).join('\n')
     )
 }
 

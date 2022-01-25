@@ -55,10 +55,6 @@ const linesFromCSV = (text:string):Array<Array<string>> =>
 
 const dateFromMDY = (text:string):string => text.slice(-4) + text.slice(0,2) + text.slice(3,5)
 
-const makeNumber = (inp:string):number => {
-    return Math.round(parseFloat(inp)*100)
-}
-
 export const transforms = {
     'manual': (acctIgnore:string, srcFile:string, fileText:string):Inputs => {
         return linesFromCSV(fileText)
@@ -105,8 +101,8 @@ export const transforms = {
     'capOneCC': (acct:string, srcFile:string, fileText:string, gd):Inputs => {
         return linesFromCSV(fileText) 
             .map(line=> {
-                const debit = line[5].length===0 ? 0 : makeNumber(line[5])
-                const credit= line[6].length===0 ? 0 : makeNumber(line[6])
+                const debit = line[5].length===0 ? 0 : parseFloat(line[5])
+                const credit= line[6].length===0 ? 0 : parseFloat(line[6])
                 return {
                     crdAccount: '',
                     debAccount: acct,

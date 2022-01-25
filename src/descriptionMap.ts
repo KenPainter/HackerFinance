@@ -37,6 +37,9 @@ export function loadDescriptionMap():DescriptionMap {
 }
 
 function loadOne(fileSpec:string,retval:DescriptionMap) {
+    if(!fs.existsSync(fileSpec)) {
+        return 
+    }
     const lines = fs.readFileSync(fileSpec ,'utf8')
         .split('\n')
         .slice(1)

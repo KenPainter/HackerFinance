@@ -130,7 +130,7 @@ export class Statement {
         let total = 0
         groups.forEach(group=>{
             const g = this.accountTallies[group]
-            if(g.trxCount===0) {
+            if(g.trxCount===0 ) {
                 return
             }
             r.printTitles()

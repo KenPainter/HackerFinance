@@ -93,7 +93,6 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
             continue
         }
         if(!(trx.crdAccount in accountsMap)) {
-            console.log("partial")
             incompleteTrxs.push(trx)
             trxPartial++
             continue;
