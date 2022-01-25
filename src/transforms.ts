@@ -60,58 +60,61 @@ const makeNumber = (inp:string):number => {
 }
 
 export const transforms = {
-    'manual': (acctIgnore:string, fileText:string):Inputs => {
+    'manual': (acctIgnore:string, srcFile:string, fileText:string):Inputs => {
         return linesFromCSV(fileText)
             .map(line=>{
                 return { 
-                    date: line[1],
-                    amount: makeNumber(line[2]),
+                    crdAccount: line[0],
+                    debAccount: line[1],
+                    date: line[2],
+                    amount: line[3],
                     description: line[4],
-                    inpAccount: line[0],
-                    inpOffset: line[3]
+                    srcFile: srcFile
                 }
             })
     },
 
-    'chaseBanking': (acct:string, fileText:string):Inputs => { 
+    'chaseBanking': (acct:string, srcFile:string, fileText:string):Inputs => { 
         return linesFromCSV(fileText)
             .map(line=>{
                 return { 
+                    crdAccount: '',
+                    debAccount: acct,
                     date: dateFromMDY(line[1]),
-                    amount: makeNumber(line[3]),
+                    amount: line[3],
                     description: line[2],
-                    inpAccount: acct,
-                    inpOffset: '',
+                    srcFile: srcFile
                 }
             })
     },
 
-    'chaseCC': (acct:string, fileText:string):Inputs => {
+    'chaseCC': (acct:string, srcFile:string, fileText:string):Inputs => {
         return linesFromCSV(fileText)
             .map(line=> {
                 return {
+                    crdAccount: '',
+                    debAccount: acct,
                     date: dateFromMDY(line[1]),
-                    amount: makeNumber(line[5]),
+                    amount: line[5],
                     description: line[2],
-                    inpAccount: acct,
-                    inpOffset: '',
+                    srcFile: srcFile
                 }
             })
     },
 
-    'capOneCC': (acct:string, fileText:string, gd):Inputs => {
+    'capOneCC': (acct:string, srcFile:string, fileText:string, gd):Inputs => {
         return linesFromCSV(fileText) 
             .map(line=> {
                 const debit = line[5].length===0 ? 0 : makeNumber(line[5])
                 const credit= line[6].length===0 ? 0 : makeNumber(line[6])
                 return {
+                    crdAccount: '',
+                    debAccount: acct,
                     date: line[1].replace(/\-/g,''),
-                    amount: credit-debit,
+                    amount: (credit-debit).toString(),
                     description: line[3],
-                    inpAccount: acct,
-                    inpOffset: '',
+                    srcFile: srcFile
                 }
             })
     },
-
 }

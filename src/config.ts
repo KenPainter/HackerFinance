@@ -1,47 +1,46 @@
 interface Config {
-    PATH_OPEN_INPUT: string
-    PATH_OPEN_REPORTS: string
-    PATH_OPEN_LEDGER: string
-    PATH_COA: string
-    PATH_TODO: string
-    PATH_CLOSED_INPUTS: string
-    PATH_CLOSED_LEDGERS: string
-    PATH_CLOSED_REPORTS: string
-    PATH_USRCONFIG:string
+    PATH_INPUTS: string
+    PATH_INPUTS_IMPORTED: string
+    PATH_OPEN_BATCH: string
 
-    PATH_DESCRIPTON_MAP:string
-    PATH_TRANSACTION_MAP:string
+    FILE_OPEN_TRANSACTION_MAP: string
+    FILE_CLOSED_TRANSACTION_MAP: string
+
+    FILE_MASTER_USER_CONFIG: string
+    FILE_MASTER_COA: string
+    FILE_MASTER_DESCRIPTION_MAP: string
+
+    PATH_CLOSED_REPORTS: string
+
+    GROUPS_TB: [string,string,string,string,string]
+    GROUPS_BS: [string,string,string]
+    GROUPS_IS: [string,string]
 
     CURRENCY_FORMAT_WIDTH: number
-
-    groupsTB: Array<string>
-    groupsBS: Array<string>
-    groupsIS: Array<string>
 }
 
 
 
 export const config:Config = {
-    // Directory Paths
-    PATH_OPEN_INPUT: 'open/input/',
-    PATH_OPEN_REPORTS: 'open/reports/',
-    PATH_OPEN_LEDGER: 'open/ledger/ledger.json',
+    PATH_INPUTS: 'data/1-inputs',
+    PATH_INPUTS_IMPORTED: 'data/5-imported-inputs',
 
-    // File Paths
-    PATH_COA: 'masters/chart-of-accounts.csv',
-    PATH_DESCRIPTON_MAP: 'masters/match-by-description.csv',
-    PATH_TRANSACTION_MAP: 'open/shared/transactionMap.csv',
-    PATH_TODO: 'open/to-do.txt',
+    // Open Batch
+    PATH_OPEN_BATCH: 'data/2-open-batch',
+    FILE_OPEN_TRANSACTION_MAP: 'data/2-open-batch/transactionMap.csv',
+    FILE_CLOSED_TRANSACTION_MAP: 'data/3-closed-batches/closed-transactionMap.csv',
 
-    PATH_CLOSED_INPUTS: 'closed/inputs',
-    PATH_CLOSED_LEDGERS: 'closed/ledgers',
-    PATH_CLOSED_REPORTS: 'closed/reports',
+    // Masters
+    FILE_MASTER_USER_CONFIG: 'data/0-masters/usrConfig.ts',
+    FILE_MASTER_COA: 'data/0-masters/chart-of-accounts.csv',
+    FILE_MASTER_DESCRIPTION_MAP: 'data/0-masters/description-map.csv',
 
-    PATH_USRCONFIG: 'usr/usrConfig.ts',
+    PATH_CLOSED_REPORTS: 'data/4-statements',
 
-    // Statement printing options
-    CURRENCY_FORMAT_WIDTH: 14,
-    groupsTB: [ 'Asset', 'Liability', 'Equity', 'Income', 'Expense'],
-    groupsBS: [ 'Asset', 'Liability', 'Equity'],
-    groupsIS: [ 'Income', 'Expense'],
+    // Groups for reports
+    GROUPS_TB: [ 'Asset', 'Liability', 'Equity', 'Income', 'Expense'],
+    GROUPS_BS: [ 'Asset', 'Liability', 'Equity'],
+    GROUPS_IS: [ 'Income', 'Expense'],
+
+    CURRENCY_FORMAT_WIDTH: 14
 }

@@ -7,7 +7,7 @@
  */
 import * as fs from 'fs'
 import { config } from './config'
-import { usrConfig } from '../usr/usrConfig'
+import { usrConfig } from '../data/0-masters/usrConfig'
 
 export interface FieldInfo {
     type: "string" | "credit" | "debit" | "date" | "number"

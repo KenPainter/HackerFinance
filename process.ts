@@ -5,101 +5,28 @@
  * This is the main program for processing an open batch
  */
 // node imports
-import * as fs from 'fs'
+import { processOpen } from './src/processOpen'
+import { logBad } from './src/log'
 
-// Low-level utilities
-import { log } from './src/log'
-import { config } from './src/config'
-import { clearToDo, haveToDo, reportToDo } from './src/todo'
-import { checkInput, checkChartOfAccounts, checkDescriptionMap } from './src/checks'
-import { dumpJSON } from './src/dumpJSON'
-
-// Functional imports
-import { loadInput } from './src/process-loadInput'
-import { loadChartOfAccounts, writeChartOfAccounts } from './src/chartOfAccounts'
-import { loadDescriptionMap, writeDescriptionMap, loadTransactionMap, writeTransactionMap } from './src/process-maps'
-import { matchLogic } from './src/process-matchLogic'
-import { tabulate } from './src/tabulate'
-import { Statement } from './src/Statement'
-
-// Schema Imports
-import {
-    Inputs, Chart, 
-    DescriptionMap, TransactionMap,
-    Ledger
-} from './src/schema'
-import { inputsToLedger } from './src/inputsToLedger'
-import { fstat } from 'fs'
-
-// Process end 
-const doExit = () => {
-    log(0,"HACKER FINANCE process complete")
-    process.exit()
-}
-
-//
-// ---- process start ----
-//
-log(0,'HACKER FINANCE process start')
-
-// Start by clearing the To-Do list
-clearToDo()
-
-// Run some checks.  These first checks are fatal,
-// if any of them fail we stop
-checkInput()
-checkChartOfAccounts()
-checkDescriptionMap()
-if(haveToDo()) {
-    reportToDo()
-    log(0,'')
-    log(0,'Please clear up the TO-DO items and run the process again')
-    doExit() 
-}
-
-// Load the input file into InputTransaction format
-const inputTransactions:Inputs = loadInput()
-
-// Masters and maps
-const chart:Chart = loadChartOfAccounts()
-const descriptionMap:DescriptionMap = loadDescriptionMap()
-const transactionMap:TransactionMap = loadTransactionMap()
-
-// Now the magic, match transactions to offset accounts
-matchLogic(inputTransactions,descriptionMap,transactionMap)
-
-// If you are hacking on hacker finance, these commands
-// dump all the inputs for inspections.  
-// Please comment them out before opening a PR
-//dumpJSON('chart-of-accounts',chart)
-//dumpJSON('descriptionMap',descriptionMap)
-//dumpJSON('transactionMap',transactionMap)
-//dumpJSON('inputTransactions',inputTransactions)
-
-// Write out the maps and the chart of accounts
-writeChartOfAccounts(chart,inputTransactions)
-writeDescriptionMap(inputTransactions,descriptionMap)
-writeTransactionMap(inputTransactions)
-
-// We are (almost) finished.
-log(1,'')
-if(haveToDo()) {
-    reportToDo()
+// see if they asked to close all complete transactions
+const args = process.argv
+const message = 'Sorry, I only accept one optional parameter: "close", as in "ts-node process close"' 
+let close = false
+let ok = true
+if(args.length > 3) {
+    logBad(message)
+    ok = false
 }
 else {
-    const ledger:Ledger = inputsToLedger(inputTransactions,chart)
-    fs.writeFileSync(config.PATH_OPEN_LEDGER,JSON.stringify(ledger,null,4))
-    
-    const [ accountDetails, accountsFlat ] = tabulate(chart,ledger)
-    dumpJSON('accountDetails',accountDetails)
-    dumpJSON('accountsFlat',accountsFlat)
-
-    const statement = new Statement(accountDetails,accountsFlat)
-    statement.runEverything(false,config.PATH_OPEN_REPORTS)
-
-    log(1,'! There are no To-Do items !')
-    log(1,`You can view statements in: ${config.PATH_OPEN_REPORTS}`)
-    log(1,"If you like the statements, close the batch by running 'ts-node close'")
+    if(args.length === 3) {
+        if(args[2] !== 'close') {
+            logBad(message)
+            ok = false
+        }
+        close = true
+    }
 }
 
-doExit()
+if(ok) {
+    processOpen(close)
+}

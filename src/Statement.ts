@@ -21,9 +21,9 @@ export class Statement {
 
     runEverything(reportEmptyAccounts:boolean = true,outPath:string = config.PATH_CLOSED_REPORTS) {
         this.outPath = outPath
-        const gtb = config.groupsTB
-        const gbs = config.groupsBS
-        const gis = config.groupsIS
+        const gtb = config.GROUPS_TB
+        const gbs = config.GROUPS_BS
+        const gis = config.GROUPS_IS
         this.runLevel0('Trial Balance Level 0','trial-balance-0',gtb)
         this.runLevel0('Balance Sheet Level 0','balance-sheet-0',gbs)
         this.runLevel0('Income Statement Level 0','income-statement-0',gis)
@@ -34,7 +34,7 @@ export class Statement {
 
         this.runLevel2('Trial Balance Level 2','trial-balance-2',gtb)
         this.runLevel2('Balance Sheet Level 2','balance-sheet-2',gbs)
-        this.runLevel2('Income Statement Level 2','income-statement-2',gtb)
+        this.runLevel2('Income Statement Level 2','income-statement-2',gis)
 
         this.runTransactions('Transactions','transactions',gtb)
 
@@ -181,6 +181,9 @@ export class Statement {
                     trx.description
                 )
             }
+            r.printDashes()
+            const balance = this.accountTallies[g].children[s].children[a].balance
+            r.printLine('        ',balance,balance)
             r.printBlank()
         })
         
@@ -193,7 +196,7 @@ export class Statement {
 
         r.printAny("These accounts have no transactions.")
         r.printAny("They can safely be removed from the chart of accounts")
-        r.printAny("Chart of accounts is in: "+config.PATH_COA)
+        r.printAny("Chart of accounts is in: "+config.FILE_MASTER_COA)
 
         const tolist = this.accountsFlat.filter(act=>act[3]===0)
         if(tolist.length===0) {

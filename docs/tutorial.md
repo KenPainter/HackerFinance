@@ -1,5 +1,14 @@
 # Hacker Finance Tutorial
 
+## THIS TUTORIAL IS NOT READY
+
+After writing the tutorial below I realized it was way too hard to
+work with (while using it myself).  I just refactored the entire
+workflow and must update the tutorial.
+
+Stay tuned.
+
+
 ## Installing
 
 Step 1: Install ts-node

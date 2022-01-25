@@ -1,19 +1,54 @@
-import { Chart, Ledger, AccountTallies, AccountsFlat, AccountStats } from "./schema"
+import { AccountMap, Inputs, Ledger, AccountTallies, AccountsFlat, AccountStats, LedgerTransaction } from "./schema"
 import { config } from './config'
 
-export function tabulate(chart:Chart,ledger:Ledger):[AccountTallies,AccountsFlat] {
+export function tabulate(chart:AccountMap,trxs:Inputs):[AccountTallies,AccountsFlat] {
     let t:AccountTallies = {}
+
+    // first thing is "double" the transactions and put into reporting format
+    const ledger:Ledger = trxs.reduce((acc,trx)=>{
+        const amount = Math.round(parseFloat(trx.amount)*100)
+        // the first transaction
+        const trx1 = { 
+            date: trx.date,
+            description: trx.description,
+            sourceFile: trx.srcFile,
+            dbAmount: amount,
+            dbGroup: chart[trx.debAccount][0],
+            dbSubgroup: chart[trx.debAccount][1],
+            dbAccount: trx.debAccount,
+            crGroup: chart[trx.crdAccount][0],
+            crSubgroup: chart[trx.crdAccount][1],
+            crAccount: chart[trx.crdAccount][2]
+        }
+        // the reverse transaction
+        const trx2 = {
+            date: trx.date,
+            description: trx.description,
+            sourceFile: trx.srcFile,
+            dbAmount: -amount,
+            dbGroup: chart[trx.crdAccount][0],
+            dbSubgroup: chart[trx.crdAccount][1],
+            dbAccount: trx.crdAccount,
+            crGroup: chart[trx.debAccount][0],
+            crSubgroup: chart[trx.debAccount][1],
+            crAccount: chart[trx.debAccount][2]
+        }
+        acc.push(trx1)
+        acc.push(trx2)
+        return acc
+    },[])
+
 
     // Statements require all groups to be present.  They will not all
     // be present when reporting on a batch, as it has a very limited
     // set of groups.  So just add them all in at the top.
-    config.groupsTB.forEach(group=>{
+    config.GROUPS_TB.forEach(group=>{
         t[group] = new AccountStats()
     })
 
     let accountsFlat = []
     // Iterate the transactions to build tree
-    Object.values(ledger).forEach(trx=>{
+    Object.values(ledger).forEach((trx:LedgerTransaction)=>{
         const group = trx.dbGroup
         const subgroup = trx.dbSubgroup
         const account = trx.dbAccount

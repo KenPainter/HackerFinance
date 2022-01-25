@@ -7,7 +7,6 @@
  * would conflict with a simple .gitignore
  */
 import * as fs from 'fs'
-import * as path from 'path'
 import { config } from './src/config'
 
 const log = console.log
@@ -36,43 +35,38 @@ function makeDir(dir:string) {
         log("Directory already exists: ",dir)
     }
 }
-const dirTree:{[key:string]: Array<string>} = {
-    "closed": [ 'inputs', 'ledgers', 'reports'],
-    "open": [ 'input', 'shared', 'reports', 'ledger'],
-    "masters": [],
-    "usr": [],
-    "debug": []
-}
-Object.keys(dirTree).forEach(dir=>{
-    makeDir(dir)
-    dirTree[dir].forEach(subdir=>{
-        makeDir(path.join(dir,subdir))
-    })
-})
+
+makeDir('data')
+makeDir('data/0-masters')
+makeDir('data/1-inputs')
+makeDir('data/2-open-batch')
+makeDir('data/3-closed-batches')
+makeDir('data/4-statements')
+makeDir('data/5-imported-inputs')
 
 // Check: usrConfig
-if(!fs.existsSync(config.PATH_USRCONFIG)) {
-    log("Creating file:",config.PATH_USRCONFIG)
-    fs.writeFileSync(config.PATH_USRCONFIG,text_usrConfig)
+if(!fs.existsSync(config.FILE_MASTER_USER_CONFIG)) {
+    log("Creating file:",config.FILE_MASTER_USER_CONFIG)
+    fs.writeFileSync(config.FILE_MASTER_USER_CONFIG, text_usrConfig)
 } 
 else {
-    log("File already exists: ",config.PATH_USRCONFIG)
+    log("File already exists: ",config.FILE_MASTER_USER_CONFIG)
 }
 
 // Check: Chart of Accounts
-if(!fs.existsSync(config.PATH_COA)) {
-    log("Creating file:",config.PATH_COA)
-    fs.writeFileSync(config.PATH_COA,text_COA)
+if(!fs.existsSync(config.FILE_MASTER_COA)) {
+    log("Creating file:",config.FILE_MASTER_COA)
+    fs.writeFileSync(config.FILE_MASTER_COA,text_COA)
 } 
 else {
-    log("File already exists: ",config.PATH_COA)
+    log("File already exists: ",config.FILE_MASTER_COA)
 }
 
-// Check: Chart of Accounts
-if(!fs.existsSync(config.PATH_DESCRIPTON_MAP)) {
-    log("Creating file:",config.PATH_DESCRIPTON_MAP)
-    fs.writeFileSync(config.PATH_DESCRIPTON_MAP,'Offset,Description')
+// Check: Description Map 
+if(!fs.existsSync(config.FILE_MASTER_DESCRIPTION_MAP)) {
+    log("Creating file:",config.FILE_MASTER_DESCRIPTION_MAP)
+    fs.writeFileSync(config.FILE_MASTER_DESCRIPTION_MAP,'Credit Account,Description')
 } 
 else {
-    log("File already exists: ",config.PATH_DESCRIPTON_MAP)
+    log("File already exists: ",config.FILE_MASTER_DESCRIPTION_MAP)
 }
