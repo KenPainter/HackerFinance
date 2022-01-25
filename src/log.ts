@@ -1,20 +1,30 @@
-import * as ncl from 'node-color-log'
+import chalk from 'chalk'
 
-const SPACE = '    '
+import { formatCurrency } from './Report1992'
 
-export const logBad = (...args) => {
-    ncl.color('red').log(...args)
+const SPACE = '  '
 
-}
-export const logGood = (...args) => {
-    ncl.color('green').log(...args)
 
+export const logTitle = (arg:string) => {
+    console.log("")
+    console.log(chalk.greenBright(arg))
+    console.log("")
 }
-export const logWarn = (...args) => {
-    ncl.color('yellow').log(args[0]).color('white')
-    args.slice(1).forEach(arg=>ncl.log(SPACE,arg))
+
+export const logBadNews = (...args) => {
+    console.log(chalk.red.bold(SPACE,'Bad news:',args[0]))
+    console.log(SPACE,SPACE,...args.slice(1))
 }
-export const logInfo = (...args) => {
-    ncl.color('blue').log(args[0]).color('white')
-    args.slice(1).forEach(arg=>ncl.log(SPACE,arg))
+export const logConclusion = (...args) => {
+    console.log("")
+    console.log(chalk.magenta(SPACE,...args))
 }
+export const logBlank = () =>  console.log("")
+
+export const logDetail = (...args) => console.log(SPACE,SPACE,chalk.white(...args))
+
+export const logCurrency = (arg:number) => formatCurrency(arg)
+
+
+
+

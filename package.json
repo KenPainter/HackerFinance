@@ -10,8 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/chalk": "^2.2.0",
     "@types/node": "^17.0.5",
-    "node-color-log": "^7.0.0"
+    "chalk": "^4.1.2"
   }
 }

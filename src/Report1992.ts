@@ -9,6 +9,9 @@ import * as fs from 'fs'
 import { config } from './config'
 import { usrConfig } from '../data/0-masters/usrConfig'
 
+export const formatCurrency = (num:number) => 
+    num.toLocaleString(usrConfig.localeCurrencySpecifier,usrConfig.localeCurrencyOptions).padStart(config.CURRENCY_FORMAT_WIDTH)
+
 export interface FieldInfo {
     type: "string" | "credit" | "debit" | "date" | "number"
     title: string

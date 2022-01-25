@@ -8,9 +8,15 @@ import * as fs from 'fs'
 
 // Utility imports
 import { Inputs } from './schema'
-import { logWarn } from './log'
 import { config } from './config'
 
+export function transactionMapCount(loadClosed:boolean=false):number {
+    const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
+    return fs.readFileSync(fileSpec,'utf8')
+        .split('\n')
+        .slice(1)
+        .length
+}
 
 export function loadTransactionMap(loadClosed:boolean=false):Inputs {
     const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
