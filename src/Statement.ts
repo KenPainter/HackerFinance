@@ -24,17 +24,17 @@ export class Statement {
         const gtb = config.GROUPS_TB
         const gbs = config.GROUPS_BS
         const gis = config.GROUPS_IS
-        this.runLevel0('Trial Balance Level 0','trial-balance-0',gtb)
-        this.runLevel0('Balance Sheet Level 0','balance-sheet-0',gbs)
-        this.runLevel0('Income Statement Level 0','income-statement-0',gis)
+        this.runLevel0('Trial Balance Groups','trial-balance-groups',gtb)
+        this.runLevel0('Balance Sheet Groups','balance-sheet-groups',gbs)
+        this.runLevel0('Income Statement Groups','income-statement-groups',gis)
 
-        this.runLevel1('Trial Balance Level 1','trial-balance-1',gtb)
-        this.runLevel1('Balance Sheet Level 1','balance-sheet-1',gbs)
-        this.runLevel1('Income Statement Level 1','income-statement-1',gis)
+        this.runLevel1('Trial Balance Subgroups','trial-balance-subgroups',gtb)
+        this.runLevel1('Balance Sheet Subgroups','balance-sheet-subgroups',gbs)
+        this.runLevel1('Income Statement Subgroups','income-statement-subgroups',gis)
 
-        this.runLevel2('Trial Balance Level 2','trial-balance-2',gtb)
-        this.runLevel2('Balance Sheet Level 2','balance-sheet-2',gbs)
-        this.runLevel2('Income Statement Level 2','income-statement-2',gis)
+        this.runLevel2('Trial Balance Accounts','trial-balance-accounts',gtb)
+        this.runLevel2('Balance Sheet Accounts','balance-sheet-accounts',gbs)
+        this.runLevel2('Income Statement Accounts','income-statement-accounts',gis)
 
         this.runTransactions('Transactions','transactions',gtb)
 
@@ -130,6 +130,9 @@ export class Statement {
         let total = 0
         groups.forEach(group=>{
             const g = this.accountTallies[group]
+            if(g.trxCount===0) {
+                return
+            }
             r.printTitles()
             r.printDashes()
             Object.keys(g.children).forEach(subgroup=>{

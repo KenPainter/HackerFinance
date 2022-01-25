@@ -92,17 +92,18 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
             incompleteTrxs.push(trx)
             continue
         }
-        if(trx.crdAccount.length>0 && !(trx.crdAccount in accountsMap)) {
+        if(!(trx.crdAccount in accountsMap)) {
+            console.log("partial")
             incompleteTrxs.push(trx)
             trxPartial++
             continue;
         }
-        if(trx.debAccount.length>0 && !(trx.debAccount in accountsMap)) {
+        if(!(trx.debAccount in accountsMap)) {
+            console.log("partial")
             incompleteTrxs.push(trx)
             trxPartial++
             continue;
         }
-
         trxComplete++
         completeTrxs.push(trx)
     } 
@@ -132,6 +133,12 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     logConclusion('All Processing is complete')
     console.log('   Total transactions in transactionMap:',trxTotal)
     console.log('  Transactions with incomplete accounts:',trxPartial)
-    console.log('            Transactions ready to close:',trxComplete)
+    if(closeThemUp) {
+        console.log('                    Transactions closed:',trxComplete)
+    }
+    else {
+        console.log('            Transactions ready to close:',trxComplete)
+    }
+    console.log('      Accounts requiring Group,Subgroup:',newAccounts.length)
 
 }
