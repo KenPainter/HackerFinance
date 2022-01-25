@@ -21,7 +21,7 @@ import { Statement } from './Statement'
 /**
  * Main function
  */
-export function processOpen(closeThemUp:boolean = false) {
+export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     if(! runChecks()) {
         return;
     }
@@ -36,7 +36,9 @@ export function processOpen(closeThemUp:boolean = false) {
     const descriptionMap:DescriptionMap = loadDescriptionMap()
 
     // Match by descriptions happen here, if we can find any
-    match(transactionMap,descriptionMap)
+    if(doMatch) {
+        match(transactionMap,descriptionMap)
+    }
 
     // compile the descriptions for unmatched and matched trxs
     let uDescriptions:Array<string> = []

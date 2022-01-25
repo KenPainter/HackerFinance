@@ -12,21 +12,21 @@ import { logBad } from './src/log'
 const args = process.argv
 const message = 'Sorry, I only accept one optional parameter: "close", as in "ts-node process close"' 
 let close = false
+let match = false
 let ok = true
-if(args.length > 3) {
-    logBad(message)
-    ok = false
-}
-else {
-    if(args.length === 3) {
-        if(args[2] !== 'close') {
-            logBad(message)
-            ok = false
-        }
+while(args.length > 2) {
+    const arg = args.pop()
+    if(arg==='close') {
         close = true
     }
+    else if(arg==='match') {
+        match = true
+    }
+    else {
+        logBad("I only understand two command line arguments: 'close' and 'match'")
+        ok = false
+    }
 }
-
 if(ok) {
-    processOpen(close)
+    processOpen(close,match)
 }

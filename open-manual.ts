@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 import { config } from './src/config'
 
-const FILE = path.join(config.PATH_OPEN_INPUT,'manual-x-x.csv')
+const FILE = path.join(config.PATH_INPUTS,'manual-x-x.csv')
 
 if(!fs.existsSync(FILE)) {
     fs.writeFileSync(FILE,'Debit Account,Date,Amount,Credit Account,Description')
