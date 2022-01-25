@@ -18,8 +18,15 @@ import { appendTransactionMap, transactionMapCount } from './transactionMap'
 
 export function importInputs() {
     let inputs:Inputs = []
+    let fileCount:number = 0
     const importedAlready = fs.readdirSync(config.PATH_INPUTS_IMPORTED)
-    fs.readdirSync(config.PATH_INPUTS).forEach(fileName=>{
+    const fileList = fs.readdirSync(config.PATH_INPUTS)
+    if(fileList.length===0) {
+        logBadNews(config.PATH_INPUTS,"There are no input files to process")
+        return inputs
+    }
+    
+    fileList.forEach(fileName=>{
         const fileSpec = path.join(config.PATH_INPUTS,fileName)
         const pieces = fileName.split('-')
         if(pieces.length < 3) {
@@ -56,7 +63,7 @@ export function importInputs() {
         // Wrap it up 
         inputs.push(...inputsOneFile)
         const movedSpec = path.join(config.PATH_INPUTS_IMPORTED,fileName)
-        //fs.renameSync(fileSpec,movedSpec)
+        fs.renameSync(fileSpec,movedSpec)
     })
 
     if(inputs.length===0) {
