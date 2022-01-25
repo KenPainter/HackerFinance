@@ -50,7 +50,7 @@ Outputs:
 * Income Statement at 3 different levels of detail
 * Trial Balance at 3 different levels of detail
 * All outputs at working batch level and at global level
-* Detailed transaction listtings for reconciling
+* Detailed transaction listings for reconciling
 
 Inputs:
 * A flexible "transform" system to make it easier for
