@@ -14,7 +14,7 @@ const FILE = path.join(config.PATH_INPUTS,'manual-x-x.csv')
 
 logTitle("PROCESS BEGIN: Create Manual Input")
 if(!fs.existsSync(FILE)) {
-    fs.writeFileSync(FILE,'Debit Account,Date,Amount,Credit Account,Description')
+    fs.writeFileSync(FILE,'Credit Account,Debit Account,Date,Amount,Description,Source')
     logConclusion("File created: ",FILE)
 }
 else {
