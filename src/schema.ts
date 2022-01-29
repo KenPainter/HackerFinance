@@ -1,3 +1,10 @@
+// Related to transforms
+export type Line = Array<string>
+export class Transform {
+    fieldCount: number
+    mapper: Function
+}
+
 // Related to inputs
 export type Inputs = Array<InputTransaction>
 export interface InputTransaction {

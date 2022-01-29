@@ -7,10 +7,12 @@
  */
 import * as fs from 'fs'
 import { config } from './config'
-import { usrConfig } from '../data/0-masters/usrConfig'
+
+const LOCALE_OPTIONS = {style:"decimal", minimumFractionDigits:2, maximumFractionDigits:2 }
+const LOCALE = fs.readFileSync(config.FILE_LOCALE,'utf8')
 
 export const formatCurrency = (num:number) => 
-    num.toLocaleString(usrConfig.localeCurrencySpecifier,usrConfig.localeCurrencyOptions).padStart(config.CURRENCY_FORMAT_WIDTH)
+    num.toLocaleString(LOCALE,LOCALE_OPTIONS).padStart(config.CURRENCY_FORMAT_WIDTH)
 
 export interface FieldInfo {
     type: "string" | "credit" | "debit" | "date" | "number"
@@ -24,8 +26,8 @@ export class Report1992 {
     fileSpec:string
     fieldInfo:Array<FieldInfo> = []
     PADDING:string = ' '
-    curStr:string = usrConfig.localeCurrencySpecifier
-    curObj:{[key:string]: string} = usrConfig.localeCurrencyOptions
+    curStr:string = LOCALE
+    curObj:{[key:string]:any} = LOCALE_OPTIONS
 
     constructor(public outPath:string) {}
 
@@ -71,7 +73,7 @@ export class Report1992 {
         const printVals = values.map((val,idx)=>{
             const fld = this.fieldInfo[idx]
             if(fld.type==='string') {
-                return val.padEnd(fld.size)
+                return val.slice(0,fld.size).padEnd(fld.size)
             }
             if(fld.type==='date') {
                 return val.slice(0,4)+'-'+val.slice(4,6)+'-'+val.slice(-2)
@@ -79,12 +81,12 @@ export class Report1992 {
             if(fld.type==='debit') {
                 return val <= 0 
                     ? ' '.repeat(config.CURRENCY_FORMAT_WIDTH)
-                    : (val/100).toLocaleString(this.curStr,this.curObj).padStart(config.CURRENCY_FORMAT_WIDTH)
+                    : formatCurrency(val/100)
             }
             if(fld.type==='credit') {
                 return val >= 0 
                     ? ' '.repeat(config.CURRENCY_FORMAT_WIDTH)
-                    : (-val/100).toLocaleString(this.curStr,this.curObj).padStart(config.CURRENCY_FORMAT_WIDTH)
+                    : formatCurrency(-val/100)
             }
             if(fld.type==='number') {
                 return val.toLocaleString().padStart(fld.size)

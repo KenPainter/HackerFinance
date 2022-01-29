@@ -119,14 +119,15 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     else {
         replaceTransactionMap(incompleteTrxs)
         appendTransactionMap(completeTrxs,true)
+        logConclusion("Moved complete transactions to closed transaction map")
+    }
         // now run reports on all transactions
         const closedTrx = loadTransactionMap(true)
-        logConclusion("Moved complete transactions to closed transaction map")
-        console.log('   Total number of currently closed transactions:',closedTrx.length.toLocaleString())
+        //console.log('   Total number of currently closed transactions:',closedTrx.length.toLocaleString())
         const [ aT, aF ] = tabulate(accountsMap,closedTrx)
         let statement2 = new Statement(aT,aF)
         statement2.runEverything()
-    }
+    
 
     // Report out the numbers
     logConclusion('All Processing is complete')

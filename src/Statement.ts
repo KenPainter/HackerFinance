@@ -10,6 +10,9 @@ import { config } from './config'
 import { AccountTallies, AccountsFlat } from './schema'
 import { Report1992, FieldInfo } from './Report1992'
 
+const GROUP_SIZE:number = 9
+const OTHER_SIZE:number = 11
+
 
 export class Statement {
     public outPath:string = ''
@@ -48,7 +51,7 @@ export class Statement {
         r.init(title,path.join(this.outPath,filename))
         
         r.setFieldInfo([
-            { title: 'Group',   type: 'string', size: 12 },
+            { title: 'Group',   type: 'string', size: GROUP_SIZE },
             { title: 'Debits',  type: 'debit' },
             { title: 'Credits', type: 'credit' },
             { title: 'Min Date',type: 'date' },
@@ -75,12 +78,12 @@ export class Statement {
         r.init(title,path.join(this.outPath,filename))
         
         r.setFieldInfo([
-            { title: 'Subgroup',   type: 'string', size: 15 },
+            { title: 'Subgroup',   type: 'string', size: OTHER_SIZE },
             { title: 'Debits',  type: 'debit' },
             { title: 'Credits', type: 'credit' },
             { title: 'Min Date',type: 'date' },
             { title: 'Max Date',type: 'date' },
-            { title: 'Trx Count',type: 'number', size: 9}
+            { title: 'Trx Cnt',type: 'number', size: 7}
         ])
 
         let total = 0
@@ -117,14 +120,14 @@ export class Statement {
         r.init(title,path.join(this.outPath,filename))
         
         r.setFieldInfo([
-            { title: 'Group',   type: 'string', size: 15 },
-            { title: 'Subgroup',   type: 'string', size: 15 },
-            { title: 'Account',   type: 'string', size: 15 },
+            { title: 'Group',   type: 'string', size: GROUP_SIZE },
+            { title: 'Subgroup',   type: 'string', size: OTHER_SIZE },
+            { title: 'Account',   type: 'string', size: OTHER_SIZE },
             { title: 'Debits',  type: 'debit' },
             { title: 'Credits', type: 'credit' },
             { title: 'Min Date',type: 'date' },
             { title: 'Max Date',type: 'date' },
-            { title: 'Trx Count',type: 'number', size: 9}
+            { title: 'Trx Cnt',type: 'number', size: 7}
         ])
 
         let total = 0

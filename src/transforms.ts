@@ -1,11 +1,8 @@
 /**
  * transforms.ts
  * This program is part of Hacker Finance
- * Hacker Finance is licensed under GPL Affero Version 3
  * 
  * To write a transform, look at any existing transform 
- * (except manual, it's a bit different).  Copy and paste,
- * rename it, and alter it.
  * 
  * The transform name should be simple and easy to use
  *  - the institution name, like Fidelity, Ameriprise, chase, BankOfAm etc
@@ -15,102 +12,73 @@
  * The transform maps the downloaded input fields to the 
  * InputTransaction interface (found in src/schema)
  * 
- * Five fields must be provided:
+ * When the transform receives a trx, these fields are already
+ * filled in (but of course can be overwritten)
  * 
- * FIELD: Date.  Must be 8 digit YYYYMMDD
- *   If your credit card downloads contain two dates, use the
- *   posting date, because the posting date determines what
- *   statement the transaction will appear on.  Since the user
- *   needs the statement to reconcile the balance, we have to
- *   go by what shows up on the statement.
+ *    FIELD: debAccount - from the file name
+ *    FIELD: srcFile - from the file name
  * 
- * FIELD: Amount.  Always use function makeNumber()
- *   - for asset accounts like checking and savings, money coming in is positive
- *   - for liability accounts like credit cards, spending is negative, payments are positive
+ * These fields should be populated
  * 
- * FIELD: Description. Whatever is provided
+ *    FIELD: Date.  Must be 8 digit YYYYMMDD
+ *       If your credit card downloads contain two dates, use the
+ *       posting date, because the posting date determines what
+ *       statement the transaction will appear on.  Since the user
+ *       needs the statement to reconcile the balance, we have to
+ *       go by what shows up on the statement.
  * 
- * FIELD: Account.  Use the first passed in parameter
+ *    FIELD: Amount.  A decimal number represented as a string (no currency symbols or formatting)
+ *      - for asset accounts like checking and savings, money coming in is positive
+ *      - for liability accounts like credit cards, spending is negative, payments are positive
  * 
- * FIELD: inpOffset, must be provided as an empty string
+ *    FIELD: Description. Whatever is provided
+ * 
  * 
  */ 
 
-import { Inputs } from './schema'
-
-// Removes ", $ and \r
-// Splits into lines, drops first line
-// drops blank lines
-// drops comment lines
-// collapses white space >= 2 length to one space
-// splits each line on comma
-const linesFromCSV = (text:string):Array<Array<string>> => 
-    text.replace(/[\r\"\$]/g,'')
-        .split('\n')
-        .slice(1)
-        .filter(line=>line.length>0)
-        .filter(line=>!line.trim().startsWith('//'))
-        .map(line=>line.replace(/\s{2,}/g,' '))
-        .map(line=>line.split(',')) 
+import { InputTransaction,Transform,Line } from './schema'
 
 const dateFromMDY = (text:string):string => text.slice(-4) + text.slice(0,2) + text.slice(3,5)
 
-export const transforms = {
-    'manual': (acctIgnore:string, srcFile:string, fileText:string):Inputs => {
-        return linesFromCSV(fileText)
-            .map(line=>{
-                return { 
-                    crdAccount: line[0],
-                    debAccount: line[1],
-                    date: line[2],
-                    amount: line[3],
-                    description: line[4],
-                    srcFile: srcFile
-                }
-            })
+export const transforms:{[key:string]:Transform} = {
+    'manual': {
+        fieldCount: 5,
+        mapper: (trx:InputTransaction,line:Line):void=> {
+            trx.crdAccount = line[0]
+            trx.debAccount = line[1]
+            trx.date = line[2]
+            trx.amount = line[3]
+            trx.description = line[4]
+        }
     },
 
-    'chaseBanking': (acct:string, srcFile:string, fileText:string):Inputs => { 
-        return linesFromCSV(fileText)
-            .map(line=>{
-                return { 
-                    crdAccount: '',
-                    debAccount: acct,
-                    date: dateFromMDY(line[1]),
-                    amount: line[3],
-                    description: line[2],
-                    srcFile: srcFile
-                }
-            })
+    "chaseBanking": {
+        fieldCount: 7,
+        mapper: (trx:InputTransaction,line:Line):void=>{
+            trx.date = dateFromMDY(line[1])
+            trx.description = line[2]
+            trx.amount = line[3]
+        }
     },
 
-    'chaseCC': (acct:string, srcFile:string, fileText:string):Inputs => {
-        return linesFromCSV(fileText)
-            .map(line=> {
-                return {
-                    crdAccount: '',
-                    debAccount: acct,
-                    date: dateFromMDY(line[1]),
-                    amount: line[5],
-                    description: line[2],
-                    srcFile: srcFile
-                }
-            })
+    'chaseCC': {
+        fieldCount: 7,
+        mapper: (trx:InputTransaction,line:Line):void=> {
+            trx.date = dateFromMDY(line[1])
+            trx.description = line[2]
+            trx.amount = line[5]
+        }
     },
 
-    'capOneCC': (acct:string, srcFile:string, fileText:string, gd):Inputs => {
-        return linesFromCSV(fileText) 
-            .map(line=> {
-                const debit = line[5].length===0 ? 0 : parseFloat(line[5])
-                const credit= line[6].length===0 ? 0 : parseFloat(line[6])
-                return {
-                    crdAccount: '',
-                    debAccount: acct,
-                    date: line[1].replace(/\-/g,''),
-                    amount: (credit-debit).toString(),
-                    description: line[3],
-                    srcFile: srcFile
-                }
-            })
-    },
+    'capOneCC': {
+        fieldCount: 7,
+        mapper: (trx:InputTransaction,line:Line):void=> {
+            trx.date = line[1].replace(/\-/g,'')
+            trx.description = line[3]
+
+            const debit = line[5].length===0 ? 0 : parseFloat(line[5])
+            const credit= line[6].length===0 ? 0 : parseFloat(line[6])
+            trx.amount = (credit-debit).toString()
+        }
+    }
 }

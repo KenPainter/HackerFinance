@@ -1,4 +1,6 @@
 interface Config {
+    FILE_LOCALE: string
+
     PATH_INPUTS: string
     PATH_INPUTS_IMPORTED: string
     PATH_OPEN_BATCH: string
@@ -22,8 +24,9 @@ interface Config {
 }
 
 
-
 export const config:Config = {
+    FILE_LOCALE: 'data/0-masters/locale.txt',
+
     PATH_INPUTS: 'data/1-inputs',
     PATH_INPUTS_IMPORTED: 'data/5-imported-inputs',
 
@@ -35,7 +38,7 @@ export const config:Config = {
     FILE_OPEN_DESCRIPTION_MAP: 'data/2-open-batch/unUsedDescriptionMap.csv',
 
     // Masters
-    FILE_MASTER_USER_CONFIG: 'data/0-masters/usrConfig.ts',
+    FILE_MASTER_USER_CONFIG: 'data/0-masters/locale.txt',
     FILE_MASTER_COA: 'data/0-masters/chart-of-accounts.csv',
     FILE_MASTER_DESCRIPTION_MAP: 'data/0-masters/description-map.csv',
 
@@ -46,5 +49,5 @@ export const config:Config = {
     GROUPS_BS: [ 'Asset', 'Liability', 'Equity'],
     GROUPS_IS: [ 'Income', 'Expense'],
 
-    CURRENCY_FORMAT_WIDTH: 14
+    CURRENCY_FORMAT_WIDTH: 12
 }

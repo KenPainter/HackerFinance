@@ -1,9 +1,6 @@
 import chalk from 'chalk'
 
-import { formatCurrency } from './Report1992'
-
 const SPACE = '  '
-
 
 export const logTitle = (arg:string) => {
     console.log("")
@@ -29,8 +26,6 @@ export const logWarnings = (...args) => {
     args.slice(1).forEach(arg=>console.log(SPACE,SPACE,arg))
     logBlank()
 }
-
-export const logCurrency = (arg:number) => formatCurrency(arg)
 
 
 
