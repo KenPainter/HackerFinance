@@ -14,6 +14,8 @@ interface Config {
     FILE_MASTER_COA: string
     FILE_MASTER_DESCRIPTION_MAP: string
 
+    PATH_OPEN_REPORTS: string
+    PATH_COMBO_REPORTS: string
     PATH_CLOSED_REPORTS: string
 
     GROUPS_TB: [string,string,string,string,string]
@@ -42,7 +44,9 @@ export const config:Config = {
     FILE_MASTER_COA: 'data/0-masters/chart-of-accounts.csv',
     FILE_MASTER_DESCRIPTION_MAP: 'data/0-masters/description-map.csv',
 
-    PATH_CLOSED_REPORTS: 'data/4-statements',
+    PATH_OPEN_REPORTS: 'data/4-0-statements-open',
+    PATH_COMBO_REPORTS: 'data/4-1-statements-combo',
+    PATH_CLOSED_REPORTS: 'data/4-2-statements-closed',
 
     // Groups for reports
     GROUPS_TB: [ 'Asset', 'Liability', 'Equity', 'Income', 'Expense'],

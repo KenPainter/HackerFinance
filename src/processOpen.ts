@@ -44,14 +44,16 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     let uDescriptions:Array<string> = []
     let uDescriptionCounts:{[key:string]:number} = {}
     transactionMap.forEach(trx=>{
+        const descr = trx.description.replace(/\"/g,'')
         if(trx.crdAccount==='') {
-            if(!(trx.crdAccount in uDescriptionCounts)) {
-                uDescriptionCounts[trx.description] = 0
-                uDescriptions.push(trx.description)
+            if(!uDescriptions.includes(descr)) {
+                uDescriptions.push(descr)
+                uDescriptionCounts[descr] = 0
             }
-            uDescriptionCounts[trx.description]++
+            uDescriptionCounts[descr]++
         } 
     })
+    console.log(uDescriptionCounts)
     // Immediately write this file, as we no longer will be using it
     writeUnMatchedDescriptions(uDescriptionCounts)
     writeDescriptionMap(descriptionMap)
@@ -110,7 +112,7 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     // get the tallies and run statements on complete transactions
     const [ accountTallies, accountsFlat ] = tabulate(accountsMap,completeTrxs)
     const statement = new Statement(accountTallies,accountsFlat)
-    statement.runEverything(false,config.PATH_OPEN_BATCH)
+    statement.runEverything(false,config.PATH_OPEN_REPORTS)
 
     // Write out final transaction Maps based on whether they asked to close
     if(!closeThemUp) {

@@ -26,6 +26,10 @@ export function loadTransactionMap(loadClosed:boolean=false):Inputs {
     const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
     logDetail('Loading transaction map ',fileSpec)
 
+    if(!fs.existsSync(fileSpec)) {
+        return []
+    }
+
     const lines= fs.readFileSync(fileSpec,'utf8')
         .split('\n')
         .slice(1)

@@ -12,7 +12,7 @@ my paycheck of 1000.00 into my checking account", or
 "I deposited a gift of 1000.00 into my checking account."
 
 The places money moves to and from are called *Accounts*.  The
-list of all sources and destinations of interest is called the
+list of all sources and destinations of we care about is called the
 *Chart of Accounts*.  Some accounts are tied to a real-world
 financial institution like your checking account.  Other
 accounts are "virtual", like an account tracking spending
@@ -27,7 +27,7 @@ By standard accounting rules accounts are grouped.  The
 five conventional groups are:
 * Asset - stuff I own
 * Liability - stuff I owe
-* Equity - [explained here](equity.md)
+* Equity - not explained here
 * Income - sources of money
 * Expense - reasons to spend money
 

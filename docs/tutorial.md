@@ -3,7 +3,7 @@
 ## Lesson 1: Import a File
 
 Hacker Finance takes files that you download from your
-bank, or manual files you create, and imports them into
+bank, or files you create manually, and imports them into
 the "open batch".   
 
 We will pretend we have downloaded transactions from a
@@ -39,6 +39,191 @@ Run `ts-node import`, we should see something like this:
       Appending to transaction map  data/2-open-batch/transactionMap.csv
 ```
 
-## Lesson 1: Map One Transaction Manually
+## Lesson 1: Fully Specify our First Account
 
-TO BE CONTINUED...
+After running the import, run this command: `ts-node process`. Notice
+the output says, "Accounts requiring Group, Subgroup: 1".  If we scroll
+up a bit we will see the line, "New account Checking".
+
+Hacker Finance is a build-as-you-go system.  It allows us to cheerfully
+refer to accounts it knows nothing about, but it will tell us we need
+to fill out the details on this new account "Checking".
+
+We do that by opening `data/0-masters/chart-of-accounts.txt`, which 
+will look like this:
+
+```text
+Group,Subgroup,Account
+,,Checking
+Equity,Exchange,Payments
+Equity,Exchange,Splits
+Equity,Exchange,Transfers
+Equity,Retained,Rollup
+```
+
+We are going to specify "Checking" as "Asset,Cash,Checking", which
+is [explained here](./double-entry.md), so we edit the 2nd line
+and save the file:
+
+```text
+Group,Subgroup,Account
+Asset,Cash,Checking
+Equity,Exchange,Payments
+Equity,Exchange,Splits
+Equity,Exchange,Transfers
+Equity,Retained,Rollup
+```
+
+Now run `ts-node process` again and it will say "Accounts requiring
+Group,Subgroup: 0" so that job is done.  Now it is time to map
+our transactions 
+
+## Lesson 2: Automation on Exact Description Matches
+
+The whole purpose of Hacker Finance is to map our transactions
+into accounts that track income, expenses, depreciaton, 
+holding, and more.  This can be very
+tedious.  Hacker finance has a single automation, called
+"matching", that works on transaction descriptions to do this
+more easily for common recurring transactions.
+
+Open the file `2-open-batch/unUsedDescriptionMap.csv` and note the
+3rd and fourth lines, which tell us there are two desriptions that
+each appear 12 times in the current open batch:
+
+```csv
+CrdAccount,Description
+,AllYouCanEat Bonanzaram(1)
+,BigTech PID:DD Payroll(12)
+,NewJob Payroll ADP AutoDirect(12)
+```
+
+These are paychecks from the two jobs that our fictional hacker had
+during the year.  We want to map them to "BigTech" and "NewJob"
+respectively, so edit those to lines and:
+* Add the account to the beginning
+* Remove the transaction count in parentheses from the end (The "(12)").
+
+This gives:
+
+```csv
+CrdAccount,Description
+,AllYouCanEat Bonanzaram(1)
+BigTech,BigTech PID:DD Payroll
+NewJob,NewJob Payroll ADP AutoDirect
+```
+
+...and this time when we run `ts-node process` we ask it to match:
+
+```
+ts-node process match
+```
+
+## Lesson 3: Specify Two More Accounts
+
+In early iterations of using Hacker Finance, we keep making up new
+accounts that the system does not know about, and it will keep telling
+us we need to tell it what they are.  At the end of the last
+lesson we got this output:
+
+```
+   All Processing is complete
+   Total transactions in transactionMap: 54
+  Transactions with incomplete accounts: 24
+            Transactions ready to close: 0
+      Accounts requiring Group,Subgroup: 2
+```
+
+The more you use Hacker Finance, the more of your accounts it knows,
+and the less you have to do this.  But in the beginning we often flip
+back and forth between running `ts-node process` and going over to the
+chart of accounts to fill in details.
+
+So open up `data/0-masters/chart-of-accounts.csv` and you will see it
+has two incomplete accounts:
+
+```csv
+Group,Subgroup,Account
+,,BigTech
+,,NewJob
+Asset,Cash,Checking
+Equity,Exchange,Payments
+Equity,Exchange,Splits
+Equity,Exchange,Transfers
+Equity,Retained,Rollups
+```
+
+According to the naming system [described here](./double-entry.md), we
+will name these "Income,Salaried,BigTech" and "Income,Salaried,NewJob",
+like so:
+
+```csv
+Group,Subgroup,Account
+Income,Salaried,BigTech
+Income,Salaried,NewJob
+Asset,Cash,Checking
+Equity,Exchange,Payments
+Equity,Exchange,Splits
+Equity,Exchange,Transfers
+Equity,Retained,Rollups
+```
+
+Save the file and run `ts-node process` again and this time we get
+a very interesting bit of news.  It should tell us 24 transactions
+are ready to close:
+
+```
+   All Processing is complete
+   Total transactions in transactionMap: 54
+  Transactions with incomplete accounts: 0
+            Transactions ready to close: 24
+      Accounts requiring Group,Subgroup: 0
+
+```
+
+## Lesson 4:  The Reward is Financial Statements
+
+So far we have done the work of downloading a file,
+naming it, running a few CLI commands, and editing a couple
+of files.  Hacker Finance has told us there are transactions
+ready to close, which means they are complete enough to
+provide financial statements.
+
+Open `data/4-0-statements-open/trail-balance-accounts.txt` and
+you will see:
+
+```
+Trial Balance Accounts
+
+Group     Subgroup    Account           Debits      Credits ...
+--------- ----------- ----------- ------------ ------------ ...
+Asset     Cash        Checking       39,041.52              ...
+--------- ----------- ----------- ------------ ------------ ... 
+                                     39,041.52             
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ ... 
+Income    Salaried    NewJob                      20,630.76 ... 
+Income    Salaried    BigTech                     18,410.76 ... 
+--------- ----------- ----------- ------------ ------------ ... 
+                                                  39,041.5  
+```
+
+The folder `data/4-0-statements-open` reports on transactions
+that are *complete and open*.  We can check the reports there to
+confirm that everything lines up as we expect.  In this case we
+have total debits to the Checking account that exactly match
+the two sources of income.  So these are good.
+
+Run:
+
+```
+ts-node process close
+```
+
+This moves the 24 complete transactions out of the open batch
+and into the closed batches.  We wil now see in `data/4-2-statements-closed`
+that there are financial statements detailing what we have
+processed and closed so far.
+
+
