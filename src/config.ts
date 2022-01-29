@@ -10,6 +10,7 @@ interface Config {
 
     FILE_OPEN_DESCRIPTION_MAP: string
 
+    PATH_MASTERS: string
     FILE_MASTER_USER_CONFIG: string
     FILE_MASTER_COA: string
     FILE_MASTER_DESCRIPTION_MAP: string
@@ -40,6 +41,7 @@ export const config:Config = {
     FILE_OPEN_DESCRIPTION_MAP: 'data/2-open-batch/unUsedDescriptionMap.csv',
 
     // Masters
+    PATH_MASTERS: 'data/0-masters/',
     FILE_MASTER_USER_CONFIG: 'data/0-masters/locale.txt',
     FILE_MASTER_COA: 'data/0-masters/chart-of-accounts.csv',
     FILE_MASTER_DESCRIPTION_MAP: 'data/0-masters/description-map.csv',
