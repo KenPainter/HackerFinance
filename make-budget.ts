@@ -52,13 +52,10 @@ class BudgetItem {
     ) { this.debAccount = debAccount}
 }
 
-const accounts:AccountMap = loadChartOfAccounts()
 
 const balances:{[key:string]:BudgetItem} = 
     closedTrx
         .filter(trx=>trx.date.slice(0,4)===prevYear && trx.date.slice(-2)!=='99')
-        .filter(trx=>['Income','Expense'].includes(accounts[trx.debAccount][0]) ||
-                     ['Income','Expense'].includes(accounts[trx.crdAccount][0]))
         .reduce((acc,trx)=>{
             if(!(trx.crdAccount in acc)) {
                 acc[trx.crdAccount] = new BudgetItem(trx.crdAccount)
@@ -68,17 +65,17 @@ const balances:{[key:string]:BudgetItem} =
             }
             const a:BudgetItem = acc[trx.debAccount]
             a.trxCount++
-            a.debTotal+=Math.round(parseFloat(trx.amount)*100) 
+            a.debTotal-=Math.round(parseFloat(trx.amount)*100) 
             const b:BudgetItem = acc[trx.crdAccount]
             b.trxCount++
-            b.debTotal-=Math.round(parseFloat(trx.amount)*100) 
+            b.debTotal+=Math.round(parseFloat(trx.amount)*100) 
             return acc
         },{})
 
 
 const fixed:Array<BudgetItem> = Object.values(balances)
     .map(item=>{item.debTotal=item.debTotal/100; return item})
-    .sort((a,b)=>Math.abs(a.debTotal) > Math.abs(b.debTotal) ? 1 : -1)
+    .sort((a,b)=>Math.abs(a.debTotal) < Math.abs(b.debTotal) ? 1 : -1)
 
 jsonToCSV(fixed)
 logTitle("PROCESS COMPLETE: Create a new budget")
