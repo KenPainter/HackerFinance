@@ -114,7 +114,7 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
     const statement = new Statement(accountTallies,accountsFlat)
     statement.runEverything(false,config.PATH_OPEN_REPORTS)
 
-    // Write out final transaction Maps based on whether they asked to close
+    // Write out final ransaction Maps based on whether they asked to close
     if(!closeThemUp) {
         replaceTransactionMap([...incompleteTrxs,...completeTrxs])
     }
@@ -123,12 +123,18 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
         appendTransactionMap(completeTrxs,true)
         logConclusion("Moved complete transactions to closed transaction map")
     }
-        // now run reports on all transactions
-        const closedTrx = loadTransactionMap(true)
-        //console.log('   Total number of currently closed transactions:',closedTrx.length.toLocaleString())
-        const [ aT, aF ] = tabulate(accountsMap,closedTrx)
-        let statement2 = new Statement(aT,aF)
-        statement2.runEverything()
+    // now run reports on all transactions
+    const closedTrx = loadTransactionMap(true)
+    //console.log('   Total number of currently closed transactions:',closedTrx.length.toLocaleString())
+    const [ aT, aF ] = tabulate(accountsMap,closedTrx)
+    let statement2 = new Statement(aT,aF)
+    statement2.runEverything()
+
+    // Final set of reports is the combo of complete transactions and already open trx
+    const allInputs = [...completeTrxs,...closedTrx]
+    const [ cT, cF ] = tabulate(accountsMap,allInputs)
+    let statement3 = new Statement(cT,cF)
+    statement3.runEverything(false,config.PATH_COMBO_REPORTS)
     
 
     // Report out the numbers

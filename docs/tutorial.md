@@ -226,4 +226,110 @@ and into the closed batches.  We wil now see in `data/4-2-statements-closed`
 that there are financial statements detailing what we have
 processed and closed so far.
 
+## Lesson 5:  Automation on Partial Description Matches
 
+It turns out that, at least for the institutions I use, a single
+description is never used more than once.  This is because they
+often stick date information onto a desription, so a repeating
+description like "Payment - Thank you!" shows up as "Payment - Thank You! 07/14" 
+and then as "Payment - Thank you! 08/13" and so forth.  This means
+the description matching we used earlier will not work most of
+the time.
+
+So Hacker Finance allows us to match on partial descriptions.
+
+Open up the description map again `data/2-open-batch/unUsedDescriptionMap.csv`
+and you can see this in the first few lines:
+
+```
+CrdAccount,Description
+,AllYouCanEat Bonanzaram(1)
+,PYMT ONLINE CAPITAL ONE 01/07(1)
+,PYMT ONLINE CAPITAL ONE 02/12(1)
+,PYMT ONLINE CAPITAL ONE 03/11(1)
+,PYMT ONLINE CAPITAL ONE 04/18(1)
+,PYMT ONLINE CAPITAL ONE 05/05(1)
+,PYMT ONLINE CAPITAL ONE 06/03(1)
+```
+
+These are obviously all the same kind of transaction, so let's
+make a simpler form of the description by editing line 3 to:
+* Map to the "Payments" account
+* Remove the unique parts of the description 
+
+```
+CrdAccount,Description
+,AllYouCanEat Bonanzaram(1)
+Payments,PYMT ONLINE CAPITAL ONE
+,PYMT ONLINE CAPITAL ONE 02/12(1)
+...more lines...
+```
+
+Now we run the match process again:
+
+```
+ts-node process match
+```
+
+> You may notice we did not have to tell Hacker Finance
+> about the "Payments" account.  This account is built-in
+> and is created when you first run `ts-node setup.ts`.
+
+## Lesson 6: More Financial Statements
+
+Just like our last batch, we can look at `data/4-0-statements/trial-balance-acounts.txt`
+to see the complete results of the 12 transactions that are ready to close:
+
+```
+Trial Balance Accounts
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Asset     Cash        Checking                     1,200.00 
+--------- ----------- ----------- ------------ ------------ 
+                                                   1,200.00
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------
+Equity    Exchange    Payments        1,200.00              
+--------- ----------- ----------- ------------ ------------ 
+                                      1,200.00             
+```
+
+Here we see there are *credits* to the Checking account, which
+means cash left the account.  The corresponding debits go to
+the *Payments* account, which [is explained here](./exchange-accounts.md)
+
+We can now also see what our final financial statements will
+look like when these transactions are closed by looking
+at `data/4-1-statements-combo/trial-balance-accounts`, which now
+looks like this:
+
+```
+Trial Balance Accounts
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Asset     Cash        Checking       37,841.52              
+--------- ----------- ----------- ------------ ------------
+                                     37,841.52             
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Equity    Exchange    Payments        1,200.00              
+--------- ----------- ----------- ------------ ------------ 
+                                      1,200.00             
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Income    Salaried    NewJob                      20,630.76 
+Income    Salaried    BigTech                     18,410.76 
+--------- ----------- ----------- ------------ ------------ 
+                                                  39,041.52
+```
+
+As everything looks good and is balances, let's close them out
+
+```
+ts-node process close
+```
