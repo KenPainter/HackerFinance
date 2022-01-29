@@ -485,3 +485,58 @@ Equity    Retained    BeginBalanc                    535.54
                                       1,264.46             
 
 ```
+
+## Lesson 10: The Saving Account
+
+The savings account is much simpler, so we will do the entire
+thing in one lesson.
+
+Pretend we downloaded the transactions from the bank website
+and saved them to `tutorial-inputs/tutoral-savings.csv`.  Copy
+and rename that file to `data/1-inputs/chaseBanking-Savings-2021.csv`.
+
+Before you run `ts-node import` we are going to save ourselves a step.
+We are going to manually add a transaction to the downloaded
+file to establish the beginning balance of the savings account, which
+we will decide was 3000.00.  This lets us process the whole thing in one
+pass without opening a manual batch.  Go into the renamed input file
+and add this line at the top:
+
+```
+Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #
+x,12/31/2020,"Manually added begin balance",3000.00,x,0,
+x,05/23/2021,"Transfer from Checking ending in 9999 05/23",150.00,x,0,
+x,07/23/2021,"Transfer from Checking ending in 9999 07/23",150.00,x,0,
+x,09/23/2021,"Transfer from Checking ending in 9999 09/23",150.00,x,0,
+x,11/23/2021,"Transfer from Checking ending in 9999 11/23",150.00,x,0,
+
+```
+
+> Hacker Finance only needs date, description and amount.  That's
+> why you see litle 'x' marks and '0' values in other fields.
+
+
+> If you accidentally already ran `ts-node import` before doing the manualy 
+> add you can reverse
+> it with these steps.  Go into the open batch transaction file and
+> delete all of the lines that were just imported.  Then move the
+> input file from `5-imported-inputs` back to `1-inputs`.
+
+Now do the following steps to completely process the file:
+
+* `ts-node import1`
+* `ts-node process`
+* Edit chart of accounts to spell out "Asset,Cash,Savings"
+* Go to the `unUsedDescriptionMap` and map all transactions to "Transfers"
+* Go to `transactionMap` and map the begin balance to "BeginBalances"
+* `ts-node process match`
+* Review statements for correctness
+* `ts-node process close`
+
+If all goes well the line for the Equity-Exchange-Transfers should 
+disappear, because it has no balance.  All transfers into savings from
+the Checking account download have matched up to the transactions
+downloaded for Savings, so it zeros out.
+
+## Lesson 11: The Credit Card
+
