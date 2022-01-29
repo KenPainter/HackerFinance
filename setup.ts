@@ -15,6 +15,7 @@ const text_COA = `Group,Subgroup,Account
 Equity,Exchange,Transfers
 Equity,Exchange,Payments
 Equity,Exchange,Splits
+Equity,Retained,BeginBalances
 Equity,Retained,Rollups`
 
 

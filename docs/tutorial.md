@@ -333,3 +333,155 @@ As everything looks good and is balances, let's close them out
 ```
 ts-node process close
 ```
+
+
+## Lesson 7: The Last of The Repeating Transactions
+
+Let's repeat our partial description trick to close out
+a few more recurring transactions.  Make these changes
+in `data/2-open-batch/unUsedDescriptionMap.csv`
+
+```
+// find this line
+,Transfer to Savings ending in 9999 05/23(1)
+// change it to this
+Transfers,Transfer to Savings ending in 9999
+
+// Then find this line
+,Zelle Payment To Mr Landlord 01/01(1)
+// change it to this
+Rent,Zelle Payment To Mr Landlord 
+
+```
+
+Run `ts-node process match` and we are told there is one new account
+which must be specified.  Open the chart of accounts and specify
+'Rent' as "Expense,Residence,Rent".  Then again run `ts-node process`.
+
+If you are happy with the statements, run `ts-node process close` and
+our final current Trial Balance should look like this:
+
+```
+Group     Subgroup    Account           Debits      Credits
+--------- ----------- ----------- ------------ ------------
+Asset     Cash        Checking       22,841.52             
+--------- ----------- ----------- ------------ ------------ 
+                                     22,841.52             
+
+Group     Subgroup    Account           Debits      Credits
+--------- ----------- ----------- ------------ ------------
+Equity    Exchange    Payments        1,200.00             
+Equity    Exchange    Transfers         600.00            
+--------- ----------- ----------- ------------ ------------
+                                      1,800.00             
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Income    Salaried    NewJob                      20,630.76 
+Income    Salaried    BigTech                     18,410.76
+--------- ----------- ----------- ------------ ------------
+                                                  39,041.52
+
+Group     Subgroup    Account           Debits      Credits
+--------- ----------- ----------- ------------ ------------
+Expense   Residence   Rent           14,400.00             
+--------- ----------- ----------- ------------ ------------
+                                     14,400.00           
+```
+
+## Lesson 8: Mapping Individual Transactions
+
+We have two transactions left to map in the checking account,
+and as they are not repeating transactions, we will go in
+and map them directly.
+
+Open up the transaction map `data/2-open-batch/transactionMap.csv`:
+
+```csv
+Credit Account,Debit Account,Date,Amount,Description,Source
+,Checking,20210501,-55.47,"Super Deluxe Multi-Cinema",chaseBanking-Checking-2021.csv
+,Checking,20210715,-198.14,"AllYouCanEat Bonanzaram",chaseBanking-Checking-2021.csv
+```
+
+It looks like somebody went to the movies and also to an all-you-can-eat
+restaurant.  How should these be mapped?  In Hacker Finance you can map
+them any way you want.  For this tutorial we will keep it simple and assume
+that our user calls them both "NightOut".  So we directly edit the
+transaction map and put in "NightOut" at the beginning of the two lines.
+
+
+```csv
+Credit Account,Debit Account,Date,Amount,Description,Source
+NightOut,Checking,20210501,-55.47,"Super Deluxe Multi-Cinema",chaseBanking-Checking-2021.csv
+NightOut,Checking,20210715,-198.14,"AllYouCanEat Bonanzaram",chaseBanking-Checking-2021.csv
+```
+
+After running `ts-node process` it tells us, predictably, that it has
+a new account it needs us to spell out, which is "NightOut".  So we go into the
+chart of accounts and call it "Expense,Leisure,NightOut".
+
+We run `ts-node process` to get the new statements, review them, and
+run `ts-node process close`.
+
+We are now finished with the checking account.  Or are we?  There is one
+more step.
+
+## Lesson 9: Checking Begin Balance
+
+If we look at the statements after finishing the checking account, we
+see the checking account has a total debit balance of 22,587.91.  But
+when we go online to our bank's website we see the checking account
+had an ending balance on 2021-12-31 of 23,123.45.  We expect Hacker
+Finance to correctly report our bank balance, but it cannot do this
+because we never told it about the *beginning balance*.
+
+This is easy to take care of.  We run a new command `ts-node open-manual.ts`
+that will create a *manual input* file for us.  It creates the file
+`data/1-inputs/manual-x-x.csv`.  We want to rename that to something 
+that makes more sense, so call it `manual-checking-begin2021.csv`
+
+Open the file and manually add this line:
+
+```
+Credit Account,Debit Account,Date,Amount,Description,Source
+BeginBalances,Checking,20201231,535.54,Manually Credit Begin Balance,x
+```
+
+In a manual input we specify both the credit and debit account, the
+name of the file does not matter.  We have said we want a single
+transaction that:
+* Credits the BeginBalances account, which you can [read about here](./equity-accounts.md)
+* Debits the Checking account
+* The amount is always in reference to the debit account, so
+  * a positive number means we are debiting Checking
+  * a negative number would mean a negative debit, which is the same as a credit
+
+Now we should be able to run in succession, without problems:
+
+```
+ts-node import
+ts-node process
+ts-node process close
+```
+
+And when we look at the statements, we will see the correct
+beginning balance for the checking account:
+
+```
+Balance Sheet Accounts
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Asset     Cash        Checking       23,123.45              
+--------- ----------- ----------- ------------ ------------ 
+                                     23,123.45             
+
+Group     Subgroup    Account           Debits      Credits 
+--------- ----------- ----------- ------------ ------------ 
+Equity    Exchange    Payments        1,200.00              
+Equity    Exchange    Transfers         600.00              
+Equity    Retained    BeginBalanc                    535.54 
+--------- ----------- ----------- ------------ ------------ 
+                                      1,264.46             
+
+```

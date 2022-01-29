@@ -4,6 +4,18 @@ Exchange accounts are used to prevent duplication of
 transactions, and they also help us to ensure we have
 processed all of our sources.
 
+Hacker Finance has two built-in exchange accounts:
+* Equity-Exchange-Payments
+* Equity-Exchange-Transfers
+
+We use "Payments" for payments to liabilities, like
+loans or credit cards, and "Transfers" for transfers
+between asset accounts like checking and savings.
+
+> Technically you could use just one if you wanted,
+> but if you use both it is easier to track down a
+> mistake.
+
 Consider the case of a payment from Checking to a credit
 card.  It might be tempting to map the payment to the
 credit card directly, so that in effect you would have:
@@ -22,10 +34,12 @@ We do not really know yet when the credit card company will
 *post* the transaction to their ledger.
 
 Second, as stated above we are *impacting the balance of the credit card*,
-and when we get download and process the credit card transactions,
-we will see their record of payment, which we might put in like this,
-effectively duplicating the transaction and getting the wrong balance
-on both accounts:
+but the authoritative source on the credit card balance is the
+credit card company, not us.  If we continue to insist on mapping
+the the payment out of checking directly to the credit card, then
+presumably we would do the same thing when we process the credit
+card download, mapping payments there back to Checking.  This
+duplicates the transaction and wrecks the balance on both accounts.
 
 
 ```
@@ -53,3 +67,4 @@ amount in the Payments account, it almost always means:
 * We have processed one account, like checking, but not the
   other accounts
 * We have made a mistake that must be tracked down and corrected
+

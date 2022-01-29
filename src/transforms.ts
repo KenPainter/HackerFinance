@@ -42,7 +42,7 @@ const dateFromMDY = (text:string):string => text.slice(-4) + text.slice(0,2) + t
 
 export const transforms:{[key:string]:Transform} = {
     'manual': {
-        fieldCount: 5,
+        fieldCount: 6,
         mapper: (trx:InputTransaction,line:Line):void=> {
             trx.crdAccount = line[0]
             trx.debAccount = line[1]
