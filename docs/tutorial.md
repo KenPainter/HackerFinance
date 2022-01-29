@@ -540,3 +540,22 @@ downloaded for Savings, so it zeros out.
 
 ## Lesson 11: The Credit Card
 
+The credit card is even simpler than the Savings account.  See if you
+can process it start to end with these steps:
+
+* Copy and rename to `capOneCC-Card9999-2021.csv`
+* Assume a start balance of 1400.00. Look at the existing transactions
+  to see how to enter it manually.
+* Run `ts-node import` then `ts-node process`
+* Use the descriptionMap to map ALL transactions, run `ts-node process match`
+* Update the chart of Accounts
+  * Card999 becomes Liability,Revolving,Card999
+  * Interest becomes Expense,Revolving,Interest
+* run `ts-node process` again, review the statements
+* run `ts-node process close`
+
+Both exchange accounts should now be empty.
+
+## Lesson 12: Purchasing a Vehicle
+
+
