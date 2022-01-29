@@ -8,7 +8,7 @@ the "open batch".
 
 We will pretend we have downloaded transactions from a
 JP Morgan Chase checking account.  The pretend downloaded file
-is `tutorials/tutorial-checking.`  Copy and rename the file to:
+is `tutorials/tutorial-checking.csv`  Copy and rename the file to:
 
 ```
 data/1-inputs/chaseBanking-Checking-2021.csv
