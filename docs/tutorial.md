@@ -556,6 +556,18 @@ can process it start to end with these steps:
 
 Both exchange accounts should now be empty.
 
-## Lesson 12: Purchasing a Vehicle
+## Lesson 12: Rolling Up The Year
+
+The last step is to roll up the year.  As we have processed all
+transactions for 2021, we want to zero them out, capture the
+change in net worth, and start on 2022. 
+
+> More information on why/how we do a rollup is in [Equity Accounts](./equity-accounts.md)
+
+Run `ts-node rollup.ts`.  This creates a manual input file that zeroes
+out all income and expense accounts, and puts their difference into the
+Equity account called "Equity,Retained,Rollups".
+
+
 
 
