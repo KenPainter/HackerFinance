@@ -5,6 +5,7 @@
  * This is a stright start-to-finish script.
  * 
  */
+import * as fs from 'fs'
 import * as path from 'path'
 import { config } from './config'
 import { AccountTallies, AccountsFlat  } from './schema'
@@ -46,6 +47,7 @@ export class Statement {
             this.runEmptyAccounts('Empty Accounts','accounts-empty')
         }
     }
+
 
     runLevel0(title:string,filename:string,groups:Array<string>) {
         const r = new Report1992(this.outPath)
@@ -211,6 +213,8 @@ export class Statement {
         r.printTitles()
         r.printDashes()
 
+        const forCSV = []
+
         let budgeted = 0
         let actuals = 0
         config.GROUPS_IS.forEach(g=>{
@@ -228,6 +232,7 @@ export class Statement {
                     )
                     budgeted+=aTallies.budget
                     actuals-=aTallies.balance/100
+                    forCSV.push([g,s,a,aTallies.budget,-aTallies.balance/100])
                 }
             }
         })
@@ -235,6 +240,14 @@ export class Statement {
         r.printLine('','','',budgeted,actuals)
         
         r.print()
+
+        // Now do some extra, save the budget as a CSV, it's easier
+        // to play around with that way
+        const fileNameCSV = path.join(this.outPath,'budget.csv')
+        const headers = 'Group,Subgroup,Account,Budget,Actual\n'
+        const lines = forCSV.map(line=>line.join(','))
+        fs.writeFileSync(fileNameCSV,headers+lines.join('\n'))
+         
     }
 
     runEmptyAccounts(title:string,filename:string) {
