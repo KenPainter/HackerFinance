@@ -17,6 +17,8 @@ export function loadLatestBudget():BudgetMap {
     const budgetItems = fs.readFileSync(fileSpec,'utf8')
         .split('\n')
         .slice(1)
+        .filter(line=>line.trim().length!==0)
+        .filter(line=>!line.trim().startsWith('//'))
         .map(line=>line.split(','))
         .map(line=>line.slice(-2))
 

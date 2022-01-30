@@ -217,6 +217,8 @@ export class Statement {
             for(const s in this.accountTallies[g].children) {
                 for(const a in this.accountTallies[g].children[s].children) {
                     const aTallies = this.accountTallies[g].children[s].children[a]
+                    if(aTallies.budget===0 && aTallies.balance===0) 
+                        continue;
                     r.printLine(
                         g,
                         s,
