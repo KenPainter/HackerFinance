@@ -13,6 +13,7 @@ import { config } from './config';
 import { runChecks } from './checks'
 import { loadChartOfAccounts, writeChartOfAccounts } from './chartOfAccounts';
 import { appendTransactionMap, loadTransactionMap, replaceTransactionMap } from './transactionMap';
+import { loadLatestBudget } from './budget';
 import { loadDescriptionMap, writeDescriptionMap, writeUnMatchedDescriptions } from './descriptionMap';
 import { match } from './match'
 import { tabulate } from './tabulate'
@@ -53,7 +54,6 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
             uDescriptionCounts[descr]++
         } 
     })
-    console.log(uDescriptionCounts)
     // Immediately write this file, as we no longer will be using it
     writeUnMatchedDescriptions(uDescriptionCounts)
     writeDescriptionMap(descriptionMap)
@@ -123,9 +123,9 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
         appendTransactionMap(completeTrxs,true)
         logConclusion("Moved complete transactions to closed transaction map")
     }
+
     // now run reports on all transactions
     const closedTrx = loadTransactionMap(true)
-    //console.log('   Total number of currently closed transactions:',closedTrx.length.toLocaleString())
     const [ aT, aF ] = tabulate(accountsMap,closedTrx)
     let statement2 = new Statement(aT,aF)
     statement2.runEverything()
@@ -148,5 +148,4 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
         console.log('            Transactions ready to close:',trxComplete)
     }
     console.log('      Accounts requiring Group,Subgroup:',newAccounts.length)
-
 }

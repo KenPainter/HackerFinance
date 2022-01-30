@@ -1,12 +1,18 @@
 import * as fs from 'fs'
 
-import { AccountMap  } from './schema'
+import { AccountMap, BudgetMap  } from './schema'
 import { config } from './config';
+import { writeDebug } from './debug';
 import { logDetail, logWarnings } from './log'
+import { loadLatestBudget } from './budget';
 
 // Note that checks should have already been run
 // before calling this function
 export function loadChartOfAccounts():AccountMap {
+    logDetail("Loading budget if available")
+    const budgetMap:BudgetMap = loadLatestBudget()
+    const getBudget = a => a in budgetMap ? budgetMap[a] : 0
+
     logDetail("Loading chart of accounts: ",config.FILE_MASTER_COA)
     let accountMap:AccountMap = {}
     let warnings:Array<string> = []
@@ -36,12 +42,21 @@ export function loadChartOfAccounts():AccountMap {
             return true
         })
         .forEach(line=>{
-            accountMap[line[2]] = [ line[0].trim(), line[1].trim(), line[2].trim() ]
+            accountMap[line[2]] = [ line[0].trim(), line[1].trim(), line[2].trim(), getBudget(line[2].trim()) ]
         })
         if(warnings.length > 0) {
             const warnLine = warnings.length.toString() + ' lines were dropped while loading chart of accounts'
             logWarnings(warnLine,...warnings)
         }
+
+    // Now add budget items that are not in the chart (which are a mistake but we are forgiving)
+    for(const a of Object.keys(budgetMap)) {
+        if(!(a in accountMap)) {
+            accountMap[a] = [ 'Expense', '*BUDGET*', a, getBudget(a)]
+        }
+    }
+
+    writeDebug("coa",accountMap)
 
     return accountMap
 }

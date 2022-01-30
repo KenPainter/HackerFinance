@@ -7,8 +7,8 @@
  */
 import * as path from 'path'
 import { config } from './config'
-import { AccountTallies, AccountsFlat } from './schema'
-import { Report1992, FieldInfo } from './Report1992'
+import { AccountTallies, AccountsFlat  } from './schema'
+import { Report1992, formatCurrency } from './Report1992'
 
 const GROUP_SIZE:number = 9
 const OTHER_SIZE:number = 11
@@ -19,7 +19,7 @@ export class Statement {
 
     constructor(
         public accountTallies: AccountTallies,
-        public accountsFlat:AccountsFlat
+        public accountsFlat:AccountsFlat,
     ) {}
 
     runEverything(reportEmptyAccounts:boolean = true,outPath:string = config.PATH_CLOSED_REPORTS) {
@@ -40,6 +40,7 @@ export class Statement {
         this.runLevel2('Income Statement Accounts','income-statement-accounts',gis)
 
         this.runTransactions('Transactions','transactions',gtb)
+        this.runBudget('Budget','budget',gis)
 
         if(reportEmptyAccounts) {
             this.runEmptyAccounts('Empty Accounts','accounts-empty')
@@ -192,6 +193,44 @@ export class Statement {
             r.printLine('        ',balance,balance)
             r.printBlank()
         })
+        
+        r.print()
+    }
+
+    runBudget(title:string,fileName:string,groups:Array<string>) {
+        const r = new Report1992(this.outPath)
+        r.init(title,path.join(this.outPath,fileName))
+
+        r.setFieldInfo([
+            { title: 'Group'    ,  type: 'string', size: GROUP_SIZE },
+            { title: 'Subgroup' ,  type: 'string', size: OTHER_SIZE },
+            { title: 'Account'  ,  type: 'string', size: OTHER_SIZE },
+            { title: 'Budgeted' ,  type: 'number', size: config.CURRENCY_FORMAT_WIDTH  },
+            { title: 'Actual YTD', type: 'number', size: config.CURRENCY_FORMAT_WIDTH }
+        ])
+        r.printTitles()
+        r.printDashes()
+
+        let budgeted = 0
+        let actuals = 0
+        config.GROUPS_IS.forEach(g=>{
+            for(const s in this.accountTallies[g].children) {
+                for(const a in this.accountTallies[g].children[s].children) {
+                    const aTallies = this.accountTallies[g].children[s].children[a]
+                    r.printLine(
+                        g,
+                        s,
+                        a,
+                        aTallies.budget,
+                        -aTallies.balance/100
+                    )
+                    budgeted+=aTallies.budget
+                    actuals-=aTallies.balance/100
+                }
+            }
+        })
+        r.printDashes()
+        r.printLine('','','',budgeted,actuals)
         
         r.print()
     }

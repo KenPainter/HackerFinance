@@ -25,10 +25,11 @@ let maxDate = ''
 const closedTrx = loadTransactionMap(true)
 const budget = closedTrx
     .filter(trx=>trx.date.slice(-2)=='99')
-    .forEach(trx=>{
+    .map(trx=>{
         if(trx.date>maxDate) {
             maxDate = trx.date
         }
+        return trx
     })
 
 // skip ahead one year from most recent rollup
@@ -43,41 +44,34 @@ if(fs.existsSync(pathBudgetFile)) {
 
 logConclusion("Making a budget based on year",year)
 
-class BudgetItem {
-    debAccount: string = ''
-    debTotal:number = 0
-    trxCount:number = 0
-    constructor(
-        debAccount: string
-    ) { this.debAccount = debAccount}
+const accountsMap = loadChartOfAccounts()
+interface BudgetItem {
+    debGroup: string 
+    debSubgroup: string
+    debAccount: string
+    debTotal:number 
 }
 
+const balances:Array<BudgetItem> = budget   
+    .filter(trx=>trx.date.slice(0,4)==prevYear)
+    .map(trx=>{
+        const a = accountsMap[trx.debAccount]
+        const x:BudgetItem = {
+            debGroup: a[0],
+            debSubgroup: a[1],
+            debAccount: trx.debAccount,
+            debTotal: parseFloat(trx.amount)
+        } 
+        return x
+    })
+    .sort((a,b)=>{
+        if(a.debGroup > b.debGroup) return -1
+        if(a.debGroup < b.debGroup) return 1
+        if(Math.abs(a.debTotal) < Math.abs(b.debTotal)) return 1
+        return -1
+    })
 
-const balances:{[key:string]:BudgetItem} = 
-    closedTrx
-        .filter(trx=>trx.date.slice(0,4)===prevYear && trx.date.slice(-2)!=='99')
-        .reduce((acc,trx)=>{
-            if(!(trx.crdAccount in acc)) {
-                acc[trx.crdAccount] = new BudgetItem(trx.crdAccount)
-            }
-            if(!(trx.debAccount in acc)) {
-                acc[trx.debAccount] = new BudgetItem(trx.debAccount)
-            }
-            const a:BudgetItem = acc[trx.debAccount]
-            a.trxCount++
-            a.debTotal-=Math.round(parseFloat(trx.amount)*100) 
-            const b:BudgetItem = acc[trx.crdAccount]
-            b.trxCount++
-            b.debTotal+=Math.round(parseFloat(trx.amount)*100) 
-            return acc
-        },{})
-
-
-const fixed:Array<BudgetItem> = Object.values(balances)
-    .map(item=>{item.debTotal=item.debTotal/100; return item})
-    .sort((a,b)=>Math.abs(a.debTotal) < Math.abs(b.debTotal) ? 1 : -1)
-
-jsonToCSV(fixed)
+jsonToCSV(balances)
 logTitle("PROCESS COMPLETE: Create a new budget")
 
 function jsonToCSV(items:Array<BudgetItem>) {

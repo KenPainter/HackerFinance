@@ -20,13 +20,16 @@ export interface InputTransaction {
 export type DescriptionMap = {[key:string]:Account}
 export type DescriptionCounts= {[key:string]:number};
 
+// Related to Budget Reporting
+export type BudgetMap = {[key:string]:number}
 
 // Related to Chart of Accounts
 export type Group = string
 export type Subgroup = string
 export type Account = string
+export type Budgeted = number
 export type AccountMap = {[key:string]:ChartAccount}
-export type ChartAccount = [Group,Subgroup,Account]
+export type ChartAccount = [Group,Subgroup,Account,Budgeted]
 
 // Related to Reporting
 export type Ledger = Array<LedgerTransaction>
@@ -50,6 +53,7 @@ export class AccountStats {
     public trxCount:number = 0
     public children:{[key:string]:AccountStats} = {}
     public transactions:Array<LedgerTransaction> = []
+    public budget:number = 0
 }
 
 export type AccountsFlat = Array<AccountFlat>

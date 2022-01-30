@@ -50,6 +50,7 @@ const makeFile = (fileSpec:string,text:string) => {
 }
 
 logTitle("PROCESS BEGIN: First time setup")
+makeDir('debug')
 makeDir('data')
 makeDir('data/0-masters')
 makeDir('data/1-inputs')
