@@ -1,7 +1,10 @@
 import { importInputs } from "./src/import";
-import { logTitle } from './src/log'
+import { log, logGroup,logGroupEnd } from './src/log'
 
+const stage = 'Import and process new import files'
 
-logTitle("Process Begin: Import inputs")
+log()
+logGroup(stage)
 importInputs()
-logTitle("Process Complete: Import inputs")
+logGroupEnd(stage)
+log()

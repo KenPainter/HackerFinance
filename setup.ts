@@ -7,9 +7,7 @@
  */
 import * as fs from 'fs'
 import { config } from './src/config'
-import { logDetail, logTitle } from './src/log'
-
-const log = console.log
+import { log, logGroup, logGroupEnd } from './src/log'
 
 const text_COA = `Group,Subgroup,Account
 Equity,Exchange,Transfers
@@ -32,24 +30,24 @@ export const usrConfig:UsrConfig = {
 
 function makeDir(dir:string) {
     if(!fs.existsSync(dir)) {
-        logDetail("Creating directory ",dir,"(this directory is in .gitignore)")
+        log("Creating directory ",dir,"(this directory is in .gitignore)")
         fs.mkdirSync(dir)
     }
     else {
-        logDetail("Directory already exists: ",dir)
+        log("Directory already exists: ",dir)
     }
 }
 const makeFile = (fileSpec:string,text:string) => {
     if(!fs.existsSync(fileSpec)) {
-        logDetail("Creating file:",fileSpec)
+        log("Creating file:",fileSpec)
         fs.writeFileSync(fileSpec,text)
     } 
     else {
-        logDetail("File already exists: ",fileSpec)
+        log("File already exists: ",fileSpec)
     }
 }
 
-logTitle("PROCESS BEGIN: First time setup")
+logGroup("First time setup")
 makeDir('debug')
 makeDir('data')
 makeDir('data/0-masters')
@@ -63,4 +61,4 @@ makeDir('data/5-imported-inputs')
 makeFile(config.FILE_MASTER_USER_CONFIG,'en-US')
 makeFile(config.FILE_MASTER_COA,text_COA)
 makeFile(config.FILE_MASTER_DESCRIPTION_MAP,'Credit Account,Description')
-logTitle("PROCESS COMPLETE: First time setup")
+logGroupEnd("First time setup")

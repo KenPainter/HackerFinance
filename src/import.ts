@@ -8,7 +8,7 @@ import * as path from 'path'
 
 // utility imports
 import { Inputs } from './schema'
-import { logBadNews, logConclusion, logDetail } from './log'
+import { logBadNews, logConclusion, logDetail, log, logGroup, logGroupEnd } from './log'
 import { formatCurrency } from './Report1992'
 import { config } from './config'
 
@@ -16,47 +16,78 @@ import { config } from './config'
 import { transforms } from './transforms'
 import { appendTransactionMap, transactionMapCount } from './transactionMap'
 
-type Errors = Array<string>
-
 export function importInputs() {
-    let inputs:Inputs = []
-    const importedAlready = fs.readdirSync(config.PATH_INPUTS_IMPORTED)
+    // step 1, try to load new files
+    logGroup('Loading Input Files')
+    const [ newInputs, fileList ] = loadFiles()
+    if(newInputs.length==0) {
+        logBadNews("Nothing was imported")
+    }
+    logGroupEnd('Loading Input Files')
+    if(newInputs.length==0) {
+        return
+    }
+
+    // Step 2, move files and data around
+    logGroup('Updating open batch')
+    appendTransactionMap(newInputs)
+    logGroupEnd('Updating open batch')
+
+    const msg = `Moving inputs from ${config.PATH_INPUTS} to ${config.PATH_INPUTS_IMPORTED}`
+    logGroup(msg)
+    fileList.forEach(fileName=>{
+        const movedFrom = path.join(config.PATH_INPUTS,fileName)
+        const movedTo = path.join(config.PATH_INPUTS_IMPORTED,fileName)
+        log(fileName)
+        fs.renameSync(movedFrom,movedTo)
+    })
+    logGroupEnd(msg)
+
+    // Step 3, process current open batch
+    //dosomething()
+}
+
+function loadFiles():[Inputs,Array<string>] {
     const fileList = fs.readdirSync(config.PATH_INPUTS)
     if(fileList.length===0) {
-        logBadNews(config.PATH_INPUTS,"There are no input files to process")
-        return inputs
+        logBadNews(`${config.PATH_INPUTS}: There are no input files to process`)
+        return [[] as Inputs,[]]
     }
+
+    let inputs:Inputs = []
+    let filesList:Array<string> = []
     
-    let importedCount = 0
+    const importedAlready = fs.readdirSync(config.PATH_INPUTS_IMPORTED)
+
     fileList.forEach(fileName=>{
         const fileSpec = path.join(config.PATH_INPUTS,fileName)
         const pieces = fileName.split('-')
         if(pieces.length < 3) {
-            logBadNews(fileSpec,"File will not be imported, name should be <transform>-<account>-anything-you-want.csv")
+            logBadNews(`${fileSpec}: no import, renamee as <transform>-<account>-anything-you-want.csv`)
             return
         }
         const transformName = pieces.shift()
         const account = pieces.shift()
 
         if(!(transformName in transforms)) {
-            logBadNews(fileSpec,`File will not be imported, somebody has to code up transform '${transformName}'`)
+            logBadNews(`${fileSpec}: no import, somebody has to code up transform '${transformName}'`)
             return
         }
         if(importedAlready.includes(fileName)) {
-            logBadNews(fileSpec,"This file has already been imported")
+            logBadNews(`${fileSpec}: no import, file has already been imported`)
             return
-
         }
 
         const fileContent = fs.readFileSync(fileSpec,'utf8')
         const fieldCount = transforms[transformName].fieldCount
         const [ goodLines, badLines ] = processCSV(fileContent,fieldCount)
         if(badLines.length > 0) {
-            logBadNews(fileSpec,"At least one line does not have exactly",fieldCount,"values.")
-            badLines.forEach(line=>logDetail("LINE:", line.lineNumber,"TEXT:",line.lineText))
+            logBadNews(`${fileSpec}: no import, not all lines have ${fieldCount} fields.`)
+            badLines.forEach(line=>log("LINE:", line.lineNumber,"TEXT:",line.lineText))
             return
         }
 
+        // Process the actual conversion to InputTransaction 
         const inputsOneFile = goodLines.map(line=>{
             let trx = {
                crdAccount: '',
@@ -78,32 +109,24 @@ export function importInputs() {
         }
         logConclusion("IMPORTED FILE",fileName)
         logDetail("Debit Account:",account)
-
         logDetail("Trx Count:",trxCount)
         logDetail("Sum of Transactions:",formatCurrency(trxTotal))
 
         // Wrap it up 
         inputs.push(...inputsOneFile)
-        const movedSpec = path.join(config.PATH_INPUTS_IMPORTED,fileName)
-        fs.renameSync(fileSpec,movedSpec)
-        importedCount++
+
+        // Very last thing we do, update list of imported files
+        filesList.push(fileName)
     })
 
+    // 
     inputs.sort((a,b)=>{
         if(a.date > b.date) return 1
         if(a.date < b.date) return -1
         if(a.description > b.description) return 1
         if(a.description < b.description) return -1
     })
-    const existing = transactionMapCount()
-    logConclusion("Final transaction counts")
-    logDetail("Current open transactions: ",existing)
-    logDetail("New transactions added: ",inputs.length)
-    logDetail("Total open transactions after import:",existing + inputs.length)
-
-    if(inputs.length > 0) {
-        appendTransactionMap(inputs)
-    }
+    return [inputs,filesList]
 }
 
 type GoodLines = Array<Array<string>>

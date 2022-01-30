@@ -2,16 +2,29 @@ import chalk from 'chalk'
 
 const SPACE = '  '
 
+// Put titles before and after group open/close
+export const logGroup = (title:string) => {
+    console.log(chalk.greenBright(`PROCESS BEGIN: ${title}`))
+    console.group()
+}
+export const logGroupEnd = (title:string) => {
+    console.groupEnd()
+    console.log(chalk.greenBright(`PROCESS COMPLETE: ${title}`))
+}
+
+// Simplest possible default logging
+export const log = (...args) => console.log(...args)
+
+export const logBadNews = (msg:string) => {
+    console.log(chalk.red.bold(`Bad news: ${msg}`))
+}
+
 export const logTitle = (arg:string) => {
     console.log("")
     console.log(chalk.greenBright(arg))
     console.log("")
 }
 
-export const logBadNews = (...args) => {
-    console.log(chalk.red.bold(SPACE,'Bad news:',args[0]))
-    console.log(SPACE,SPACE,...args.slice(1))
-}
 export const logConclusion = (...args) => {
     console.log("")
     console.log(chalk.magenta(SPACE,...args))
