@@ -9,7 +9,7 @@
 import { loadTransactionMap, replaceTransactionMap } from "./src/transactionMap";
 import { Inputs } from './src/schema'
 
-import { logBadNews, logConclusion, logDetail, logTitle } from './src/log'
+import { logBadNews, logConclusion, logDetail, logTitle } from './src/common/log'
 import { formatCurrency } from "./src/Report1992";
 
 logTitle("PROCESS BEGIN: Clear credit account on all trx in open batch")

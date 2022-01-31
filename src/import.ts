@@ -5,17 +5,21 @@
 // Node imports
 import * as fs from 'fs'
 import * as path from 'path'
+import { Files } from './common/Files'
 
 // utility imports
 import { Inputs } from './schema'
-import { logBadNews, logConclusion, logDetail, log, logGroup, logGroupEnd } from './log'
+import { logBadNews, logConclusion, log, logGroup, logGroupEnd } from './common/log'
 import { formatCurrency } from './Report1992'
-import { config } from './config'
 
 // functional imports
 import { transforms } from './transforms'
-import { appendTransactionMap, transactionMapCount } from './transactionMap'
+import { appendTransactionMap } from './dataLayer/transactionMap'
 import { processOpen } from './processOpen'
+
+// Global to the module
+const FILES = new Files()
+FILES.init()
 
 export function importInputs() {
     // step 1, try to load new files
@@ -31,14 +35,14 @@ export function importInputs() {
 
     // Step 2, move files and data around
     logGroup('Updating open batch')
-    appendTransactionMap(newInputs)
+    appendTransactionMap(FILES.pathOpen(),newInputs)
     logGroupEnd('Updating open batch')
 
-    const msg = `Moving inputs from ${config.PATH_INPUTS} to ${config.PATH_INPUTS_IMPORTED}`
+    const msg = `Moving inputs from ${FILES.pathInputs()} to ${FILES.pathClosed()}`
     logGroup(msg)
     fileList.forEach(fileName=>{
-        const movedFrom = path.join(config.PATH_INPUTS,fileName)
-        const movedTo = path.join(config.PATH_INPUTS_IMPORTED,fileName)
+        const movedFrom = path.join(FILES.pathInputs(),fileName)
+        const movedTo = path.join(FILES.pathImported(),fileName)
         log(fileName)
         fs.renameSync(movedFrom,movedTo)
     })
@@ -49,19 +53,21 @@ export function importInputs() {
 }
 
 function loadFiles():[Inputs,Array<string>] {
-    const fileList = fs.readdirSync(config.PATH_INPUTS)
+    const PATH_INPUTS = FILES.pathInputs()
+
+    const fileList = fs.readdirSync(PATH_INPUTS)
     if(fileList.length===0) {
-        logBadNews(`${config.PATH_INPUTS}: There are no input files to process`)
+        logBadNews(`${PATH_INPUTS}: There are no input files to process`)
         return [[] as Inputs,[]]
     }
 
     let inputs:Inputs = []
     let filesList:Array<string> = []
     
-    const importedAlready = fs.readdirSync(config.PATH_INPUTS_IMPORTED)
+    const importedAlready = fs.readdirSync(FILES.pathImported())
 
     fileList.forEach(fileName=>{
-        const fileSpec = path.join(config.PATH_INPUTS,fileName)
+        const fileSpec = path.join(PATH_INPUTS,fileName)
         const pieces = fileName.split('-')
         if(pieces.length < 3) {
             logBadNews(`${fileSpec}: no import, renamee as <transform>-<account>-anything-you-want.csv`)
@@ -109,9 +115,9 @@ function loadFiles():[Inputs,Array<string>] {
             trxTotal+= parseFloat(trx.amount)
         }
         logConclusion("IMPORTED FILE",fileName)
-        logDetail("Debit Account:",account)
-        logDetail("Trx Count:",trxCount)
-        logDetail("Sum of Transactions:",formatCurrency(trxTotal))
+        log("Debit Account:",account)
+        log("Trx Count:",trxCount)
+        log("Sum of Transactions:",formatCurrency(trxTotal))
 
         // Wrap it up 
         inputs.push(...inputsOneFile)

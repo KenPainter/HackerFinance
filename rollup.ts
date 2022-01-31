@@ -8,7 +8,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { logTitle, logDetail } from './src/log';
+import { logTitle, logDetail } from './src/common/log';
 import { loadChartOfAccounts } from "./src/chartOfAccounts";
 import { Account } from "./src/schema";
 import { loadTransactionMap } from "./src/transactionMap";

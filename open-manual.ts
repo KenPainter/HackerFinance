@@ -8,7 +8,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { config } from './src/config'
-import { logBadNews, logConclusion, logDetail, logTitle } from './src/log'
+import { logBadNews, logConclusion, logDetail, logTitle } from './src/common/log'
 
 const FILE = path.join(config.PATH_INPUTS,'manual-x-x.csv')
 

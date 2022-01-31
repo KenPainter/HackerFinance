@@ -11,7 +11,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 import { config } from './src/config'
-import { logBadNews, logConclusion, logTitle } from './src/log'
+import { logBadNews, logConclusion, logTitle } from './src/common/log'
 import { AccountMap } from './src/schema'
 
 import { loadChartOfAccounts } from './src/chartOfAccounts'

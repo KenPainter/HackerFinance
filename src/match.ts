@@ -1,4 +1,4 @@
-import { log } from "./log"
+import { log } from "./common/log"
 import { Inputs, DescriptionMap } from "./schema"
 
 export function match(inpTrxs:Inputs,descriptionMap:DescriptionMap):number {

@@ -1,6 +1,6 @@
 import { config } from './src/config'
 import { loadChartOfAccounts } from "./src/chartOfAccounts";
-import { logBadNews, logTitle } from "./src/log";
+import { logBadNews, logTitle } from "./src/common/log";
 import { AccountMap, Inputs } from './src/schema'
 import { Statement } from "./src/Statement";
 import { tabulate } from "./src/tabulate";

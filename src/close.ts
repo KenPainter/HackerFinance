@@ -5,7 +5,7 @@ import { AccountMap, Inputs } from "./schema"
 import { config } from './config'
 
 import { loadChartOfAccounts } from "./chartOfAccounts"
-import { log, logBadNews, logGroup, logGroupEnd } from "./log"
+import { log, logBadNews, logGroup, logGroupEnd } from "./common/log"
 import { appendTransactionMap, loadTransactionMap, replaceTransactionMap } from "./transactionMap"
 import { tabulate } from "./tabulate"
 import { Statement } from "./Statement"

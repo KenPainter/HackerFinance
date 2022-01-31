@@ -6,7 +6,7 @@
  * Version 1.0 complete 2022-01-25
  */
 // node imports
-import { log } from './src/log'
+import { log } from './src/common/log'
 import { processOpen } from './src/processOpen'
 
 log()

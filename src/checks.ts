@@ -7,7 +7,7 @@
 import * as fs from 'fs'
 
 import { config } from './config'
-import { logBadNews } from './log'
+import { logBadNews } from './common/log'
 
 export function runChecks() {
     if(!fs.existsSync(config.FILE_MASTER_COA)) {

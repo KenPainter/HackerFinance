@@ -9,7 +9,9 @@ import * as fs from 'fs'
 import { config } from './config'
 
 const LOCALE_OPTIONS = {style:"decimal", minimumFractionDigits:2, maximumFractionDigits:2 }
-const LOCALE = fs.readFileSync(config.FILE_LOCALE,'utf8')
+// FIXME
+//const LOCALE = fs.readFileSync(config.FILE_LOCALE,'utf8')
+const LOCALE = 'en-US'
 
 export const formatCurrency = (num:number) => 
     num.toLocaleString(LOCALE,LOCALE_OPTIONS).padStart(config.CURRENCY_FORMAT_WIDTH)

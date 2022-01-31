@@ -5,18 +5,21 @@
  */
 
 // Utility imports
-import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './schema';
-import { log, logConclusion, logGroup, logGroupEnd } from './log';
-import { config } from './config';
+import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './common/schema';
+import { log, logConclusion, logGroup, logGroupEnd } from './common/log';
 
 // Functional imports
-import { runChecks } from './checks'
-import { loadChartOfAccounts, writeChartOfAccounts } from './chartOfAccounts';
-import { loadTransactionMap, replaceTransactionMap } from './transactionMap';
-import { loadDescriptionMap, writeDescriptionMap, writeOpenDescriptionMap } from './descriptionMap';
+import { loadChartOfAccounts, writeChartOfAccounts } from './data/chartOfAccounts';
+import { loadTransactionMap, replaceTransactionMap } from './data/transactionMap';
+import { loadDescriptionMap, replaceMasterDescriptionMap, replaceOpenDescriptionMap } from './data/descriptionMap';
 import { match } from './match'
 import { tabulate } from './tabulate'
 import { Statement } from './Statement'
+import { Files } from './common/Files';
+
+// constants
+const FILES = new Files()
+FILES.init()
 
 /**
  * Main function
@@ -32,10 +35,6 @@ import { Statement } from './Statement'
 export function processOpen() {
     const msgProcessOpen = 'Process open transactions'
     logGroup(msgProcessOpen)
-    if(! runChecks()) {
-        logGroupEnd(msgProcessOpen)
-        return;
-    }
 
     // SIDE EFFECTS
     // map on description
@@ -60,16 +59,16 @@ function mapThem():Inputs {
     const msgMapThem = 'Map open transactions on description'
     logGroup(msgMapThem)
     const descriptionMap:DescriptionMap = loadDescriptionMap()
-    const inputs:Inputs = loadTransactionMap()
+    const inputs:Inputs = loadTransactionMap(FILES.pathOpen())
     const matched = match(inputs,descriptionMap)
     if(matched > 0) {
         log("There were matches, saving updated transaction map")
-        replaceTransactionMap(inputs)
+        replaceTransactionMap(FILES.pathOpen(),inputs)
     }
     else {
         log("There were no matches on description")
     }
-    writeDescriptionMap(descriptionMap)
+    replaceMasterDescriptionMap(descriptionMap)
     logGroupEnd(msgMapThem)
     return inputs
 }
@@ -92,7 +91,7 @@ function makeOpenDescriptionMap(inputs:Inputs) {
         } 
     })
     log("Found",uDescriptions.length,"unmapped transactions")
-    writeOpenDescriptionMap(uDescriptionCounts)
+    replaceOpenDescriptionMap(uDescriptionCounts)
     logGroupEnd(msgNewDescrs)
 }
 
@@ -122,7 +121,7 @@ function findNewAccounts(inputs:Inputs):AccountMap {
     }
     else {
         newAccounts.sort()
-        log(newAccounts.length,"new accounts added to chart of accounts",config.FILE_MASTER_COA)
+        log(newAccounts.length,"new accounts added to chart of accounts")
         newAccounts.forEach(act=>log("New account:",act))
         writeChartOfAccounts(accountsMap,newAccounts)
     }
@@ -159,6 +158,8 @@ function reportStats(inputs:Inputs,accountsMap:AccountMap):Inputs {
 }
 
 function runStatements(inputsComplete:Inputs,accountsMap:AccountMap) {
+    return
+    /*
     if(inputsComplete.length === 0) {
         log("No transactions are ready to close, not running any statements.")
         return
@@ -178,4 +179,5 @@ function runStatements(inputsComplete:Inputs,accountsMap:AccountMap) {
     let statement3 = new Statement(aTalliesCombo,accountsFlatCombo)
     statement3.runEverything(false,config.PATH_COMBO_REPORTS)
     logGroupEnd(msgRunStatements)
+    */
 }
