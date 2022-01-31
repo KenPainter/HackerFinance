@@ -48,10 +48,6 @@ Step 2: Clone the Repo
 
 Step 3: Run `npm install`
 
-Step 4: run `ts-node setup.ts`
-
-Step 5: If you are not in the USA, edit `data/0-masters/locale.txt` and set
-it to your locale.
 
 ## Features
 
@@ -64,6 +60,8 @@ Outputs:
 * Trial Balance at 3 different levels of detail
 * All outputs at working batch level and at global level
 * Detailed transaction listings for reconciling
+* Year-end rollup
+* Very basic budgeting 
 
 Inputs:
 * A flexible "transform" system to make it easier for
@@ -86,14 +84,10 @@ Workflow:
 * Automated mapping of repeating and recurring transactions, 
   with a permanent memory of the rules.  Which of course you can
   go change any time you want for any reason.
-* Some basic UNDO if you munge your working set and want to
-  start over.
 * Completely subvertible.  Everything is on files on disk - go
   munge up anything you want for your own reasons.
 
 Features I will definitely get around to
-* Year-end rollup
-* Date-filtered statements (probably automatically by year)
 * (maybe someday) nice HTML reports
 
 ## Learn By Following the Tutorial
