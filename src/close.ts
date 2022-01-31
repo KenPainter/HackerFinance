@@ -19,7 +19,7 @@ export function close() {
 
     // load chart of accounts and open transactions
     const accountMap:AccountMap = loadChartOfAccounts()
-    const inputs:Inputs = loadTransactionMap(FILES.pathClosed())
+    const inputs:Inputs = loadTransactionMap(FILES.pathOpen())
     const [ inputsNoMove, inputsMove ] = inputs.reduce((acc,trx)=>{
         if(!(trx.crdAccount in accountMap) || !(trx.debAccount in accountMap)) {
             acc[0].push(trx)
@@ -44,9 +44,10 @@ export function close() {
     logGroupEnd(msgMove)
 
     const msgStatements = "Running Statements on closed transactions"
+    const closed = loadTransactionMap(FILES.pathClosed())
     logGroup(msgStatements)
     const statement = new Statement()
-    statement.runEverything(FILES.pathStmClosed(),accountMap,inputs)
+    statement.runEverything(FILES.pathStmClosed(),accountMap,closed)
     logGroupEnd(msgStatements)
 
     writeFull(accountMap)
