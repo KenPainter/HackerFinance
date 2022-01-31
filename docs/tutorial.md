@@ -552,52 +552,59 @@ thing in one lesson.
 
 Pretend we downloaded the transactions from the bank website
 and saved them to `tutorial-inputs/tutoral-savings.csv`.  Copy
-and rename that file to `data/1-inputs/chaseBanking-Savings-2021.csv`.
+and rename that file to `data/tutorial/1-inputs/chaseBanking-Savings-2021.csv`.
 
-Before you run `ts-node import` we are going to save ourselves a step.
-We are going to manually add a transaction to the downloaded
-file to establish the beginning balance of the savings account, which
-we will decide was 3000.00.  This lets us process the whole thing in one
-pass without opening a manual batch.  Go into the renamed input file
-and add this line at the top:
+Before you run `ts-node import` we are going to save ourselves some steps.
+
+First, we know that when we process this file the system will detect
+a new account called "Savings" and ask us to specify it.  We may as
+well do that now while we are in the code editor.
+
+Edit `data/tutorial/0-masters/chart-of-accounts.csv` and add at the top:
+
+```
+Group,Subgroup,Account
+Asset,Cash,Savings
+...
+...
+```
+
+Also we know that we need to do the begin balance, so we can save some
+work by directly addin a line to the downloaded file that establishes
+the begin balance:
 
 ```
 Details,Posting Date,Description,Amount,Type,Balance,Check or Slip #
-x,12/31/2020,"Manually added begin balance",3000.00,x,0,
-x,05/23/2021,"Transfer from Checking ending in 9999 05/23",150.00,x,0,
-x,07/23/2021,"Transfer from Checking ending in 9999 07/23",150.00,x,0,
-x,09/23/2021,"Transfer from Checking ending in 9999 09/23",150.00,x,0,
-x,11/23/2021,"Transfer from Checking ending in 9999 11/23",150.00,x,0,
+x,12/31/2020,"Manually added begin balance",3000.00,x,0,,
+x,05/23/2021,"Transfer from Checking ending in 9999 05/23",150.00,x,0,,
+x,07/23/2021,"Transfer from Checking ending in 9999 07/23",150.00,x,0,,
+x,09/23/2021,"Transfer from Checking ending in 9999 09/23",150.00,x,0,,
+x,11/23/2021,"Transfer from Checking ending in 9999 11/23",150.00,x,0,,
 
 ```
 
 > Hacker Finance only needs date, description and amount.  That's
 > why you see litle 'x' marks and '0' values in other fields.
 
-
-> If you accidentally already ran `ts-node import` before doing the manualy 
-> add you can reverse
-> it with these steps.  Go into the open batch transaction file and
-> delete all of the lines that were just imported.  Then move the
-> input file from `5-imported-inputs` back to `1-inputs`.
+> Chase has a weird glitch in their download files.  The header lists
+> 7 fields, but each line contains 8 fields, so be sure to put in
+> two commas at the end of the line.
 
 Now do the following steps to completely process the file:
 
-* `ts-node import1`
-* `ts-node process`
-* Edit chart of accounts to spell out "Asset,Cash,Savings"
-* Go to the `unUsedDescriptionMap` and map all transactions to "Transfers"
+* `ts-node import`
+* Go to the `descriptionMap` and map all transactions to "Transfers"
 * Go to `transactionMap` and map the begin balance to "BeginBalances"
-* `ts-node process match`
+* `ts-node process`
 * Review statements for correctness
-* `ts-node process close`
+* `ts-node close`
 
 If all goes well the line for the Equity-Exchange-Transfers should 
 disappear, because it has no balance.  All transfers into savings from
 the Checking account download have matched up to the transactions
 downloaded for Savings, so it zeros out.
 
-## Lesson 11: The Credit Card
+## The Credit Card
 
 The credit card is even simpler than the Savings account.  See if you
 can process it start to end with these steps:
@@ -605,28 +612,84 @@ can process it start to end with these steps:
 * Copy and rename to `capOneCC-Card9999-2021.csv`
 * Assume a start balance of 1400.00. Look at the existing transactions
   to see how to enter it manually.
-* Run `ts-node import` then `ts-node process`
-* Use the descriptionMap to map ALL transactions, run `ts-node process match`
+* Run `ts-node import` 
 * Update the chart of Accounts
   * Card999 becomes Liability,Revolving,Card999
   * Interest becomes Expense,Revolving,Interest
+* Use the descriptionMap to map ALL transactions, run `ts-node process`
 * run `ts-node process` again, review the statements
-* run `ts-node process close`
+* run `ts-node close`
 
 Both exchange accounts should now be empty.
 
-## Lesson 12: Rolling Up The Year
+## Rolling Up The Year
+
+In real life there would be far more transactions than this, but 
+for now this should get the idea across.  So we will assume 
+everything has been entered.
 
 The last step is to roll up the year.  As we have processed all
 transactions for 2021, we want to zero them out, capture the
 change in net worth, and start on 2022. 
 
-> More information on why/how we do a rollup is in [Equity Accounts](./equity-accounts.md)
+> More information on why we do a rollup is in [Equity Accounts](./equity-accounts.md)
 
-Run `ts-node rollup.ts`.  This creates a manual input file that zeroes
-out all income and expense accounts, and puts their difference into the
-Equity account called "Equity,Retained,Rollups".
+The rollup does not create any new accounts, so we can proceed
+directly with:
 
+```
+ts-node rollup
+ts-node import
+ts-node close
+```
 
+The financial statements will now have all expenses and income
+zero'd out, and the change in net worth for the year has been
+moved to equity:
+
+```
+Balance Sheet Accounts
+
+Group     Subgroup    Account            Debits       Credits
+--------- ----------- ----------- ------------- ------------- 
+Asset     Cash        Checking        23,123.45              
+Asset     Cash        Savings          3,600.00              
+--------- ----------- ----------- ------------- ------------- 
+                                      26,723.45              
+
+Group     Subgroup    Account            Debits       Credits 
+--------- ----------- ----------- ------------- ------------- 
+Liability Revolving   Card999                          410.96
+--------- ----------- ----------- ------------- -------------
+                                                       410.96
+
+Group     Subgroup    Account            Debits       Credits
+--------- ----------- ----------- ------------- -------------
+Equity    Retained    Rollups                       24,176.95
+Equity    Retained    BeginBalanc                    2,135.54
+--------- ----------- ----------- ------------- -------------
+                                                    26,312.49
+```
+
+## A Budget for Next Year
+
+Now that the system has some idea of income and spending
+for the prior year, it is possible to make a rough budget
+for the next year.
+
+```
+ts-node make-budget
+```
+
+Now you can find and open `data/tutorial/0-masters/budget-2022.csv`.
+This account will never again be touched by the system, and it is
+expected the user will heavily modify it as the year goes on.
+
+During the year the comparison of budget to actual shows up
+in the file `data/tutorial/4-2-statements-closed/budget.txt`.
+
+For manual analysis of the budget and actuals, use the CSV
+file `data/tutorial/4-2-statements-closed/budget.csv` as a 
+starting point for work in a spreadsheet.
 
 
