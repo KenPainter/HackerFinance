@@ -1,7 +1,7 @@
-import { logBlank, logDetail } from "./log"
-import { Inputs, DescriptionMap } from "./schema"
+import { log } from "./common/log"
+import { Inputs, DescriptionMap } from "./common/schema"
 
-export function match(inpTrxs:Inputs,descriptionMap:DescriptionMap) {
+export function match(inpTrxs:Inputs,descriptionMap:DescriptionMap):number {
     // we need a list of descriptions from longest to shortest
     const descriptions = Object.keys(descriptionMap).sort((a,b)=>a.length > b.length ? -1 : 1)
     let counts:{[key:string]: number} = {}
@@ -28,10 +28,9 @@ export function match(inpTrxs:Inputs,descriptionMap:DescriptionMap) {
 
     const matched = Object.keys(counts)
     if(matched.length > 0) {
-        logBlank()
         matched.forEach(matchDesc=>{
-            logDetail(`${counts[matchDesc]} transactions matched for: ${matchDesc}`)
+            log(`${counts[matchDesc]} transactions matched for: ${matchDesc}`)
         })
-        logBlank()
     }
+    return matched.length
 }

@@ -36,7 +36,7 @@
  * 
  */ 
 
-import { InputTransaction,Transform,Line } from './schema'
+import { InputTransaction,Transform,Line } from './common/schema'
 
 const dateFromMDY = (text:string):string => text.slice(-4) + text.slice(0,2) + text.slice(3,5)
 
@@ -52,8 +52,19 @@ export const transforms:{[key:string]:Transform} = {
         }
     },
 
-    "chaseBanking": {
+    // Not sure how this happened, but some Chase downloads I get
+    // have 7 fields, and some end with a comma so they look like
+    // they have 8.  So I made two transforms
+    "chaseBanking7": {
         fieldCount: 7,
+        mapper: (trx:InputTransaction,line:Line):void=>{
+            trx.date = dateFromMDY(line[1])
+            trx.description = line[2]
+            trx.amount = line[3]
+        }
+    },
+    "chaseBanking": {
+        fieldCount: 8,
         mapper: (trx:InputTransaction,line:Line):void=>{
             trx.date = dateFromMDY(line[1])
             trx.description = line[2]

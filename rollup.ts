@@ -6,48 +6,23 @@
  * a manual input that reverses them
  */
 
-import * as fs from 'fs'
-import * as path from 'path'
-import { logTitle, logDetail } from './src/log';
-import { loadChartOfAccounts } from "./src/chartOfAccounts";
-import { Account } from "./src/schema";
-import { loadTransactionMap } from "./src/transactionMap";
-import { config } from './src/config'
+import { Account } from "./src/common/schema";
+import { Files } from './src/common/Files'
+import { groups } from './src/common/groups'
 
-logTitle("PROCESS BEGIN: Year end rollup")
+import { loadChartOfAccounts } from "./src/dataLayer/chartOfAccounts";
+import { loadTransactionMap } from "./src/dataLayer/transactionMap";
+
+import { makeManualInput } from './src/dataLayer/manualInput';
+
+const FILES = new Files()
+FILES.init()
 
 // do this as fixed constant for now
 const date = '20211231'
 
-let trxs = loadTransactionMap(true)
+let trxs = loadTransactionMap(FILES.pathClosed())
 let accountMap = loadChartOfAccounts()
-
-// load closed transactions
-const groups = [ 'Income', 'Expense']
-const totals:{[key:string]:number} = {}
-for(const trx of trxs) {
-    // Note we reverse everything, so -Debits, +Credits
-    if(groups.includes(accountMap[trx.debAccount][0])) {
-        doOne(trx.debAccount,-Math.round(parseFloat(trx.amount)*100))
-    }
-    if(groups.includes(accountMap[trx.crdAccount][0])) {
-        doOne(trx.crdAccount,Math.round(parseFloat(trx.amount)*100))
-    }
-}
-for(const acc in totals) {
-    totals[acc]=totals[acc]/100
-}
-
-logDetail("Writing out a manual input")
-const year = date.slice(0,4)
-const newDate = date.slice(0,6)+"99"
-const fileSpec = path.join(config.PATH_INPUTS,"manual-rollup-"+year+".csv")
-const text = Object.keys(totals)
-    .map(account=>`Rollups,${account},${newDate},${totals[account]},Year End Rollup ${year},`)
-fs.writeFileSync(fileSpec,
-    "Credit Account,Debit Account,Date,Amount,Description,Source\n" +
-    text.join("\n")
-)
 
 function doOne(acc:Account,amt:number) {
     if(!(acc in totals)) {
@@ -56,4 +31,33 @@ function doOne(acc:Account,amt:number) {
     totals[acc]+=amt
 }
 
-logTitle("PROCESS END: Year end rollup")
+//
+// ----------------- begin processing -----------------
+//
+
+// load closed transactions.  Note that we multiply by 100
+// during the tally to prevent floating point silliness, then
+// divide again at the end
+const totals:{[key:string]:number} = {}
+for(const trx of trxs) {
+    // Note we reverse everything, so -Debits, +Credits
+    if(groups.is.includes(accountMap[trx.debAccount].group)) {
+        doOne(trx.debAccount,-Math.round(parseFloat(trx.amount)*100))
+    }
+    if(groups.is.includes(accountMap[trx.crdAccount].group)) {
+        doOne(trx.crdAccount,Math.round(parseFloat(trx.amount)*100))
+    }
+}
+for(const acc in totals) {
+    totals[acc]=totals[acc]/100
+}
+
+const year = date.slice(0,4)
+const newDate = date.slice(0,6)+"99"
+const rollups = Object.entries(totals).map(entry=>{
+    const account:string = entry[0]
+    const total:number = entry[1]
+    return [ 'Rollups', account, newDate, total.toString(), `Year End Rollup ${year}`,'' ]
+})
+makeManualInput(rollups,'manual-rollup-'+year)
+

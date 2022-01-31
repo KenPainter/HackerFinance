@@ -7,27 +7,33 @@
  */
 import * as fs from 'fs'
 import * as path from 'path'
-import { config } from './config'
-import { AccountTallies, AccountsFlat  } from './schema'
+
+import { groups } from './common/groups'
+import { Files } from './common/Files'
+
+import { AccountTallies, AccountMap, Inputs  } from './common/schema'
 import { Report1992, formatCurrency } from './Report1992'
+import { tabulate } from './tabulate'
 
 const GROUP_SIZE:number = 9
 const OTHER_SIZE:number = 11
+const CURRENCY_SIZE:number = 14
+
+const FILES = new Files()
+FILES.init()
 
 
 export class Statement {
     public outPath:string = ''
+    public accountTallies:AccountTallies = {}
 
-    constructor(
-        public accountTallies: AccountTallies,
-        public accountsFlat:AccountsFlat,
-    ) {}
-
-    runEverything(reportEmptyAccounts:boolean = true,outPath:string = config.PATH_CLOSED_REPORTS) {
+    runEverything(outPath:string,accountMap:AccountMap,inputs:Inputs) {
         this.outPath = outPath
-        const gtb = config.GROUPS_TB
-        const gbs = config.GROUPS_BS
-        const gis = config.GROUPS_IS
+        this.accountTallies = tabulate(accountMap,inputs)
+
+        const gtb = groups.tb
+        const gbs = groups.bs
+        const gis = groups.is
         this.runLevel0('Trial Balance Groups','trial-balance-groups',gtb)
         this.runLevel0('Balance Sheet Groups','balance-sheet-groups',gbs)
         this.runLevel0('Income Statement Groups','income-statement-groups',gis)
@@ -42,10 +48,6 @@ export class Statement {
 
         this.runTransactions('Transactions','transactions',gtb)
         this.runBudget('Budget','budget',gis)
-
-        if(reportEmptyAccounts) {
-            this.runEmptyAccounts('Empty Accounts','accounts-empty')
-        }
     }
 
 
@@ -177,24 +179,23 @@ export class Statement {
             { title: 'Description', type: 'string', size: 50}
         ])
 
-        this.accountsFlat.forEach(flat=> {
-            const [g,s,a] = flat
-            const trxs = this.accountTallies[g].children[s].children[a].transactions
-            trxs.sort((a,b)=>a.date > b.date ? 1 : -1)
-            r.printAny(g+ ' - ' + s + ' - ' + a)
-            r.printTitles()
-            r.printDashes()
-            for(const trx of trxs) {
-                r.printLine(trx.date,trx.dbAmount,trx.dbAmount,
-                    trx.crGroup + ' - ' + trx.crSubgroup + ' - ' + trx.crAccount,
-                    trx.description
-                )
+        for(const g of Object.keys(this.accountTallies)) {
+            for(const s in this.accountTallies[g].children) {
+                for(const a in this.accountTallies[g].children[s].children) {
+                    const trxs = this.accountTallies[g].children[s].children[a].transactions
+                    trxs.sort((a,b)=>a.date > b.date ? 1 : -1)
+                    r.printAny(g+ ' - ' + s + ' - ' + a)
+                    r.printTitles()
+                    r.printDashes()
+                    for(const trx of trxs) {
+                        r.printLine(trx.date,trx.dbAmount,trx.dbAmount,
+                            trx.crGroup + ' - ' + trx.crSubgroup + ' - ' + trx.crAccount,
+                            trx.description
+                        )
+                    }
+                }
             }
-            r.printDashes()
-            const balance = this.accountTallies[g].children[s].children[a].balance
-            r.printLine('        ',balance,balance)
-            r.printBlank()
-        })
+        }
         
         r.print()
     }
@@ -207,8 +208,8 @@ export class Statement {
             { title: 'Group'    ,  type: 'string', size: GROUP_SIZE },
             { title: 'Subgroup' ,  type: 'string', size: OTHER_SIZE },
             { title: 'Account'  ,  type: 'string', size: OTHER_SIZE },
-            { title: 'Budgeted' ,  type: 'number', size: config.CURRENCY_FORMAT_WIDTH  },
-            { title: 'Actual YTD', type: 'number', size: config.CURRENCY_FORMAT_WIDTH }
+            { title: 'Budgeted' ,  type: 'number', size: CURRENCY_SIZE  },
+            { title: 'Actual YTD', type: 'number', size: CURRENCY_SIZE }
         ])
         r.printTitles()
         r.printDashes()
@@ -217,7 +218,7 @@ export class Statement {
 
         let budgeted = 0
         let actuals = 0
-        config.GROUPS_IS.forEach(g=>{
+        groups.forEach(g=>{
             for(const s in this.accountTallies[g].children) {
                 for(const a in this.accountTallies[g].children[s].children) {
                     const aTallies = this.accountTallies[g].children[s].children[a]
@@ -250,6 +251,7 @@ export class Statement {
          
     }
 
+    /*
     runEmptyAccounts(title:string,filename:string) {
         const r = new Report1992(this.outPath)
         r.init(title,path.join(this.outPath,filename))
@@ -272,4 +274,5 @@ export class Statement {
 
         r.print()
     }
+    */
 }

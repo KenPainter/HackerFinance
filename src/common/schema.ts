@@ -1,3 +1,25 @@
+/**
+ * Schema items are generally defined in the order
+ * they are needed by scripts that are executed by
+ * somebody following the tutorial
+ */
+
+// Related to Chart of Accounts
+export type Group = string
+export type Subgroup = string
+export type Account = string
+export type BudgetNumber = string
+export type AccountMap = {[key:string]:ChartAccount}
+export interface ChartAccount {
+    group: Group
+    subgroup: Subgroup
+    account: Account
+    budget: BudgetNumber
+}
+// Related to Budget Reporting
+export type BudgetMap = {[key:string]:string}
+
+
 // Related to transforms
 export type Line = Array<string>
 export class Transform {
@@ -20,16 +42,7 @@ export interface InputTransaction {
 export type DescriptionMap = {[key:string]:Account}
 export type DescriptionCounts= {[key:string]:number};
 
-// Related to Budget Reporting
-export type BudgetMap = {[key:string]:number}
 
-// Related to Chart of Accounts
-export type Group = string
-export type Subgroup = string
-export type Account = string
-export type Budgeted = number
-export type AccountMap = {[key:string]:ChartAccount}
-export type ChartAccount = [Group,Subgroup,Account,Budgeted]
 
 // Related to Reporting
 export type Ledger = Array<LedgerTransaction>

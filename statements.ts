@@ -1,12 +1,19 @@
-import { config } from './src/config'
-import { loadChartOfAccounts } from "./src/chartOfAccounts";
-import { logBadNews, logTitle } from "./src/log";
-import { AccountMap, Inputs } from './src/schema'
-import { Statement } from "./src/Statement";
-import { tabulate } from "./src/tabulate";
-import { loadTransactionMap } from "./src/transactionMap";
 
-logTitle("PROCESS BEGIN: Run statements as-of a date")
+import { AccountMap, Inputs } from './src/common/schema'
+import { logBadNews,logGroup,logGroupEnd } from "./src/common/log";
+import { Files } from "./src/common/Files"
+
+import { loadTransactionMap } from "./src/dataLayer/transactionMap";
+import { loadChartOfAccounts } from "./src/dataLayer/chartOfAccounts";
+
+import { Statement } from "./src/Statement";
+
+const FILES = new Files()
+FILES.init()
+
+const msg= "Run statements as-of a date"
+
+logGroup(msg)
 
 // look for one argument, which we take as the date
 const args = process.argv
@@ -27,11 +34,10 @@ if(!okAlready) {
 
 // Still here? we are ready to go
 const chart:AccountMap = loadChartOfAccounts()
-const inputs:Inputs = loadTransactionMap(true)
+const inputs:Inputs = loadTransactionMap(FILES.pathClosed())
 const filteredInputs = inputs.filter(trx=>trx.date<=date)
 
-// Get tallies and flattened account
-const [ accountTallies, accountsFlat ] = tabulate(chart,filteredInputs)
+const statement = new Statement()
+statement.runEverything(FILES.pathStmClosed(),chart,filteredInputs)
 
-const statement = new Statement(accountTallies,accountsFlat)
-statement.runEverything(false,config.PATH_CLOSED_REPORTS)
+logGroupEnd(msg)

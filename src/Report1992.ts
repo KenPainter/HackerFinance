@@ -6,13 +6,15 @@
  * 
  */
 import * as fs from 'fs'
-import { config } from './config'
 
 const LOCALE_OPTIONS = {style:"decimal", minimumFractionDigits:2, maximumFractionDigits:2 }
-const LOCALE = fs.readFileSync(config.FILE_LOCALE,'utf8')
+// FIXME
+//const LOCALE = fs.readFileSync(config.FILE_LOCALE,'utf8')
+const LOCALE = 'en-US'
+const CURRENCY_FORMAT_WIDTH = 13
 
 export const formatCurrency = (num:number) => 
-    num.toLocaleString(LOCALE,LOCALE_OPTIONS).padStart(config.CURRENCY_FORMAT_WIDTH)
+    num.toLocaleString(LOCALE,LOCALE_OPTIONS).padStart(CURRENCY_FORMAT_WIDTH)
 
 export interface FieldInfo {
     type: "string" | "credit" | "debit" | "date" | "number"
@@ -38,7 +40,7 @@ export class Report1992 {
     setFieldInfo(info) {
         this.fieldInfo = info.map(fld=>{
             if(['debit','credit'].includes(fld.type)) {
-                fld.size = config.CURRENCY_FORMAT_WIDTH
+                fld.size = CURRENCY_FORMAT_WIDTH
             }
             if(fld.type==='date') {
                 fld.size = 10
@@ -80,12 +82,12 @@ export class Report1992 {
             }
             if(fld.type==='debit') {
                 return val <= 0 
-                    ? ' '.repeat(config.CURRENCY_FORMAT_WIDTH)
+                    ? ' '.repeat(CURRENCY_FORMAT_WIDTH)
                     : formatCurrency(val/100)
             }
             if(fld.type==='credit') {
                 return val >= 0 
-                    ? ' '.repeat(config.CURRENCY_FORMAT_WIDTH)
+                    ? ' '.repeat(CURRENCY_FORMAT_WIDTH)
                     : formatCurrency(-val/100)
             }
             if(fld.type==='number') {

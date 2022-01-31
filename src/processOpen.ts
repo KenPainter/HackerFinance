@@ -5,46 +5,81 @@
  */
 
 // Utility imports
-import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './schema';
-import { logBlank, logConclusion, logDetail } from './log';
-import { config } from './config';
+import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './common/schema';
+import { log, logConclusion, logGroup, logGroupEnd } from './common/log';
 
 // Functional imports
-import { runChecks } from './checks'
-import { loadChartOfAccounts, writeChartOfAccounts } from './chartOfAccounts';
-import { appendTransactionMap, loadTransactionMap, replaceTransactionMap } from './transactionMap';
-import { loadLatestBudget } from './budget';
-import { loadDescriptionMap, writeDescriptionMap, writeUnMatchedDescriptions } from './descriptionMap';
+import { loadChartOfAccounts, writeChartOfAccounts } from './dataLayer/chartOfAccounts';
+import { loadTransactionMap, replaceTransactionMap } from './dataLayer/transactionMap';
+import { loadDescriptionMap, replaceMasterDescriptionMap, replaceOpenDescriptionMap } from './dataLayer/descriptionMap';
 import { match } from './match'
-import { tabulate } from './tabulate'
-import { Statement } from './Statement'
+import { Statement  } from './Statement'
+import { Files } from './common/Files';
+
+// constants
+const FILES = new Files()
+FILES.init()
 
 /**
  * Main function
+ * 
+ * This is a processing routine, so all of the helper functions
+ * have or may have side effects.  All side effects are writing
+ * to disk, either appending to or replacing files.
+ * 
+ * The order of operations allows later steps to make use of
+ * results of previous steps. 
+ * 
  */
-export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
-    if(! runChecks()) {
-        return;
-    }
+export function processOpen() {
+    const msgProcessOpen = 'Process open transactions'
+    logGroup(msgProcessOpen)
 
-    // Get the cleaned up chart of accounts
-    const accountsMap:AccountMap = loadChartOfAccounts()
+    // SIDE EFFECTS
+    // map on description
+    const inputs:Inputs = mapThem()
 
-    // Load the transactionMap as best as we have it
-    const transactionMap:Inputs = loadTransactionMap()
+    // SIDE EFFECTS
+    // make new map of descriptions on open transactions
+    makeOpenDescriptionMap(inputs)
 
-    // Load permanent and current description maps
+    // SIDE EFFECTS
+    // find any new accounts and return the usable result
+    const accountsMap:AccountMap = findNewAccounts(inputs)
+
+    // Getting to the end, tell the user what's going on
+    const inputsComplete = reportStats(inputs,accountsMap)
+
+    // and finally...
+    runStatements(inputsComplete,accountsMap)
+}
+
+function mapThem():Inputs {
+    const msgMapThem = 'Map open transactions on description'
+    logGroup(msgMapThem)
     const descriptionMap:DescriptionMap = loadDescriptionMap()
-
-    // Match by descriptions happen here, if we can find any
-    if(doMatch) {
-        match(transactionMap,descriptionMap)
+    const inputs:Inputs = loadTransactionMap(FILES.pathOpen())
+    const matched = match(inputs,descriptionMap)
+    if(matched > 0) {
+        log("There were matches, saving updated transaction map")
+        replaceTransactionMap(FILES.pathOpen(),inputs)
     }
+    else {
+        log("There were no matches on description")
+    }
+    replaceMasterDescriptionMap(descriptionMap)
+    logGroupEnd(msgMapThem)
+    return inputs
+}
+
+function makeOpenDescriptionMap(inputs:Inputs) {
+    const msgNewDescrs = "Compiling descriptions for unmapped transactions"
+    logGroup(msgNewDescrs)
 
     // compile the descriptions for unmatched and matched trxs
     let uDescriptions:Array<string> = []
     let uDescriptionCounts:{[key:string]:number} = {}
-    transactionMap.forEach(trx=>{
+    inputs.forEach(trx=>{
         const descr = trx.description.replace(/\"/g,'')
         if(trx.crdAccount==='') {
             if(!uDescriptions.includes(descr)) {
@@ -54,98 +89,97 @@ export function processOpen(closeThemUp:boolean = false,doMatch:boolean=false) {
             uDescriptionCounts[descr]++
         } 
     })
-    // Immediately write this file, as we no longer will be using it
-    writeUnMatchedDescriptions(uDescriptionCounts)
-    writeDescriptionMap(descriptionMap)
+    log("Found",uDescriptions.length,"unmapped transactions")
+    replaceOpenDescriptionMap(uDescriptionCounts)
+    logGroupEnd(msgNewDescrs)
+}
+
+function findNewAccounts(inputs:Inputs):AccountMap {
+    const msgNewAccounts = 'Finding newly referenced accounts in transaction map'
+    logGroup(msgNewAccounts)
+    const accountsMap = loadChartOfAccounts()
 
     // Look for new accounts and report them
     const newAccounts:Array<string> = []
-    transactionMap.forEach((trx:InputTransaction)=>{
+    inputs.forEach((trx:InputTransaction)=>{
         const candidates:Array<string> = [ trx.crdAccount.trim(), trx.debAccount.trim() ]
         candidates.forEach(candidate=>{
-            if(candidate.length > 0) {
+            if(candidate.length > 0) {                        
                 if(!(candidate in accountsMap)) {
                     if(!newAccounts.includes(candidate)) {
                         newAccounts.push(candidate)
                     }
                 }
             }
-
         })
     })
-    if(newAccounts.length > 0) {
-        newAccounts.sort()
-        writeChartOfAccounts(accountsMap,newAccounts)
-        logBlank()
-        logDetail(newAccounts.length,"New accounts added to chart of accounts",config.FILE_MASTER_COA)
-        newAccounts.forEach(act=>logDetail("New account ",act))
-        logBlank()
-    }
 
-    // Pull out the statistics to report
+
+    if(newAccounts.length == 0) {
+        log("No new accounts are referenced in open transaction map")
+    }
+    else {
+        newAccounts.sort()
+        log(newAccounts.length,"new accounts added to chart of accounts")
+        newAccounts.forEach(act=>log("New account:",act))
+        writeChartOfAccounts(accountsMap,newAccounts)
+    }
+    logGroupEnd(msgNewAccounts)
+    return accountsMap
+}
+
+function reportStats(inputs:Inputs,accountsMap:AccountMap):Inputs {
     let trxTotal:number = 0
     let trxPartial:number = 0
     let trxComplete:number = 0
-    let completeTrxs:Inputs = []
-    let incompleteTrxs:Inputs = []
-    for(const trx of transactionMap) {
+    let inputsComplete:Inputs = []
+    for(const trx of inputs) {
         trxTotal++
         if(trx.crdAccount.length===0 || trx.debAccount.length===0) {
-            incompleteTrxs.push(trx)
             continue
         }
         if(!(trx.crdAccount in accountsMap)) {
-            incompleteTrxs.push(trx)
             trxPartial++
             continue;
         }
         if(!(trx.debAccount in accountsMap)) {
-            console.log("partial")
-            incompleteTrxs.push(trx)
             trxPartial++
             continue;
         }
+        inputsComplete.push(trx)
         trxComplete++
-        completeTrxs.push(trx)
     } 
+    logConclusion("Current status of open transaction map:")
+    log("Total transactions:",trxTotal)
+    log("Mapped to incomplete accounts:",trxPartial)
+    log("Ready to close:",trxComplete)
+    return inputsComplete
+}
 
-    // get the tallies and run statements on complete transactions
-    const [ accountTallies, accountsFlat ] = tabulate(accountsMap,completeTrxs)
-    const statement = new Statement(accountTallies,accountsFlat)
-    statement.runEverything(false,config.PATH_OPEN_REPORTS)
-
-    // Write out final ransaction Maps based on whether they asked to close
-    if(!closeThemUp) {
-        replaceTransactionMap([...incompleteTrxs,...completeTrxs])
+function runStatements(inputsComplete:Inputs,accountsMap:AccountMap) {
+    if(inputsComplete.length === 0) {
+        log("No transactions are ready to close, not running any statements.")
+        return
     }
-    else {
-        replaceTransactionMap(incompleteTrxs)
-        appendTransactionMap(completeTrxs,true)
-        logConclusion("Moved complete transactions to closed transaction map")
-    }
+    const statement = new Statement()
+    const msgRunStatements = "Running Statements"
+    logGroup(msgRunStatements)
+    log("Running statements based on ",inputsComplete.length,"transactions that are ready to close.")
 
-    // now run reports on all transactions
-    const closedTrx = loadTransactionMap(true)
-    const [ aT, aF ] = tabulate(accountsMap,closedTrx)
-    let statement2 = new Statement(aT,aF)
-    statement2.runEverything()
+    log("Running statements just for trx ready to close")
+    statement.runEverything(FILES.pathStmOpen(),accountsMap,inputsComplete)
 
-    // Final set of reports is the combo of complete transactions and already open trx
-    const allInputs = [...completeTrxs,...closedTrx]
-    const [ cT, cF ] = tabulate(accountsMap,allInputs)
-    let statement3 = new Statement(cT,cF)
-    statement3.runEverything(false,config.PATH_COMBO_REPORTS)
+    //const [ aTalliesOpen, accountsFlatOpen ] = tabulate(accountsMap,inputsComplete)
+    //const statementOpen =  new Statement(aTalliesOpen,accountsFlatOpen)
+    //statementOpen.runEverything(false,config.PATH_OPEN_REPORTS)
+
+    log("Running statements as they would appear after closing")
+    const allInputs = [...inputsComplete,...loadTransactionMap(FILES.pathClosed()) ]
+    statement.runEverything(FILES.pathStmCombo(),accountsMap,allInputs)
     
+    //const [ aTalliesCombo, accountsFlatCombo ] = tabulate(accountsMap,allInputs)
+    //let statement3 = new Statement(aTalliesCombo,accountsFlatCombo)
+    //statement3.runEverything(false,config.PATH_COMBO_REPORTS)
 
-    // Report out the numbers
-    logConclusion('All Processing is complete')
-    console.log('   Total transactions in transactionMap:',trxTotal)
-    console.log('  Transactions with incomplete accounts:',trxPartial)
-    if(closeThemUp) {
-        console.log('                    Transactions closed:',trxComplete)
-    }
-    else {
-        console.log('            Transactions ready to close:',trxComplete)
-    }
-    console.log('      Accounts requiring Group,Subgroup:',newAccounts.length)
+    logGroupEnd(msgRunStatements)
 }
