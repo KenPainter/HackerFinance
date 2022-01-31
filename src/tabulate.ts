@@ -1,10 +1,14 @@
-import { AccountMap, Inputs, Ledger, AccountTallies, AccountsFlat, AccountStats, LedgerTransaction, } from "./schema"
-import { config } from './config'
-import { writeDebug } from "./debug"
+import { groups } from './common/groups'
+import { AccountMap, Inputs, Ledger, AccountTallies, AccountStats } from "./common/schema"
+import { logGroup, logGroupEnd, log, logWarn } from './common/log'
 
-export function tabulate(chart:AccountMap,trxs:Inputs):[AccountTallies,AccountsFlat] {
+export function tabulate(chart:AccountMap,trxs:Inputs):AccountTallies {
+    const msgTallies = "Compiling transactions for statements"
+    logGroup(msgTallies)
+    log("Count of accounts in chart of accounts:",Object.keys(chart).length)
+    log("Count of transactions to process:",trxs.length)
+
     let t:AccountTallies = {}
-
     // first thing is "double" the transactions and put into reporting format
     const ledger:Ledger = trxs.reduce((acc,trx)=>{
         const amount = Math.round(parseFloat(trx.amount)*100)
@@ -14,12 +18,12 @@ export function tabulate(chart:AccountMap,trxs:Inputs):[AccountTallies,AccountsF
             description: trx.description,
             sourceFile: trx.srcFile,
             dbAmount: amount,
-            dbGroup: chart[trx.debAccount][0],
-            dbSubgroup: chart[trx.debAccount][1],
+            dbGroup: chart[trx.debAccount].group,
+            dbSubgroup: chart[trx.debAccount].subgroup,
             dbAccount: trx.debAccount,
-            crGroup: chart[trx.crdAccount][0],
-            crSubgroup: chart[trx.crdAccount][1],
-            crAccount: chart[trx.crdAccount][2],
+            crGroup: chart[trx.crdAccount].group,
+            crSubgroup: chart[trx.crdAccount].subgroup,
+            crAccount: trx.crdAccount,
         }
         // the reverse transaction
         const trx2 = {
@@ -27,36 +31,40 @@ export function tabulate(chart:AccountMap,trxs:Inputs):[AccountTallies,AccountsF
             description: trx.description,
             sourceFile: trx.srcFile,
             dbAmount: -amount,
-            dbGroup: chart[trx.crdAccount][0],
-            dbSubgroup: chart[trx.crdAccount][1],
+            dbGroup: chart[trx.crdAccount].group,
+            dbSubgroup: chart[trx.crdAccount].subgroup,
             dbAccount: trx.crdAccount,
-            crGroup: chart[trx.debAccount][0],
-            crSubgroup: chart[trx.debAccount][1],
-            crAccount: chart[trx.debAccount][2]
+            crGroup: chart[trx.debAccount].group,
+            crSubgroup: chart[trx.debAccount].subgroup,
+            crAccount: trx.debAccount
         }
         acc.push(trx1)
         acc.push(trx2)
         return acc
     },[])
+    log("Count of transactions converted to report format:",ledger.length)
 
-    // Statements require all groups to be present.  They will not all
-    // be present when reporting on a batch, as it has a very limited
-    // set of groups.  So just add them all in at the top.
-    config.GROUPS_TB.forEach(group=>{
+    // Unconditionally create top-level for all groups.
+    // makes downstream code simpler
+    groups.tb.forEach(group=>{
         t[group] = new AccountStats()
     })
 
     // Get a merged list of all accounts named in ledger or COA
     const coaAccounts = Object.keys(chart)
-    const allAccounts = Object.values(ledger).reduce((acc,trx)=>{
-        if(!(trx.dbAccount in acc)) {
+    const lengthBefore = coaAccounts.length 
+    const allAccounts = ledger.reduce((acc,trx)=>{
+        if(!acc.includes(trx.dbAccount)) {
+            logWarn("Ledger names account not in chart of accounts:",trx.dbAccount)
             acc.push(trx.dbAccount)
         }
         return acc
     },coaAccounts)
-    // Iterate the transactions to build tree
-    const getGroup = (a:string) => a in chart ? chart[a][0] : 'Expense'
-    const getSub   = (a:string) => a in chart ? chart[a][1] : '*LEDGER*'
+
+    // Iterate the transactions to build tree.  Again, build 
+    // unconditionally for all accounts
+    const getGroup = (a:string) => a in chart ? chart[a].group : 'Expense'
+    const getSub   = (a:string) => a in chart ? chart[a].subgroup: '*LEDGER*'
     allAccounts.forEach(acc=>{
         const group = getGroup(acc)
         const subgroup = getSub(acc)
@@ -95,15 +103,19 @@ export function tabulate(chart:AccountMap,trxs:Inputs):[AccountTallies,AccountsF
     }
 
     // Add budget items from coa to tallies
+    log("Adding budget figures (if available) to compiled tallies")
     coaAccounts.forEach(a=>{
         const g = getGroup(a)
         const s = getSub(a)
-        t[g].budget += chart[a][3]
-        t[g].children[s].budget += chart[a][3]
-        t[g].children[s].children[a].budget = chart[a][3]
+        t[g].budget += parseFloat(chart[a].budget)
+        t[g].children[s].budget += parseFloat(chart[a].budget)
+        t[g].children[s].children[a].budget = parseFloat(chart[a].budget)
     })
+    logGroupEnd(msgTallies)
+    return t
 
     // get flattened list of accounts and sort them
+    /*
     let accountsFlat = []
     for(const g of Object.keys(t)) {
         const subgroups = Object.keys(t[g].children)
@@ -123,8 +135,6 @@ export function tabulate(chart:AccountMap,trxs:Inputs):[AccountTallies,AccountsF
         if(a[2] < b[2]) return -1
     })
 
-    writeDebug('tallies',t)    
-    writeDebug('accounts-flat',accountsFlat)
-
     return [ t , accountsFlat]
+    */
 }

@@ -10,7 +10,7 @@ import { loadLatestBudget } from './budget';
 
 const FILES = new Files()
 FILES.init()
-const FILE_NAME_COA = path.join(FILES.pathMasters(),"chart-of-accounts.txt")
+const FILE_NAME_COA = path.join(FILES.pathMasters(),"chart-of-accounts.csv")
 
 const text_COA = `Group,Subgroup,Account
 Equity,Exchange,Transfers

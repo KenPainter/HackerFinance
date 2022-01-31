@@ -8,7 +8,7 @@ import * as path from 'path'
 import { Files } from './common/Files'
 
 // utility imports
-import { Inputs } from './schema'
+import { Inputs } from './common/schema'
 import { logBadNews, logConclusion, log, logGroup, logGroupEnd } from './common/log'
 import { formatCurrency } from './Report1992'
 

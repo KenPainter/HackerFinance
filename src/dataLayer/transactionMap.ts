@@ -8,7 +8,7 @@ import * as fs from 'fs'
 import * as path from 'path'
 
 // Utility imports
-import { Inputs } from '../schema'
+import { Inputs } from '../common/schema'
 import { log } from '../common/log'
 
 // Constants

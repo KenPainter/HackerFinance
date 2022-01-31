@@ -9,12 +9,11 @@ import { AccountMap, DescriptionMap, Inputs, InputTransaction } from './common/s
 import { log, logConclusion, logGroup, logGroupEnd } from './common/log';
 
 // Functional imports
-import { loadChartOfAccounts, writeChartOfAccounts } from './data/chartOfAccounts';
-import { loadTransactionMap, replaceTransactionMap } from './data/transactionMap';
-import { loadDescriptionMap, replaceMasterDescriptionMap, replaceOpenDescriptionMap } from './data/descriptionMap';
+import { loadChartOfAccounts, writeChartOfAccounts } from './dataLayer/chartOfAccounts';
+import { loadTransactionMap, replaceTransactionMap } from './dataLayer/transactionMap';
+import { loadDescriptionMap, replaceMasterDescriptionMap, replaceOpenDescriptionMap } from './dataLayer/descriptionMap';
 import { match } from './match'
-import { tabulate } from './tabulate'
-import { Statement } from './Statement'
+import { Statement  } from './Statement'
 import { Files } from './common/Files';
 
 // constants
@@ -158,26 +157,29 @@ function reportStats(inputs:Inputs,accountsMap:AccountMap):Inputs {
 }
 
 function runStatements(inputsComplete:Inputs,accountsMap:AccountMap) {
-    return
-    /*
     if(inputsComplete.length === 0) {
         log("No transactions are ready to close, not running any statements.")
         return
     }
+    const statement = new Statement()
     const msgRunStatements = "Running Statements"
     logGroup(msgRunStatements)
     log("Running statements based on ",inputsComplete.length,"transactions that are ready to close.")
 
     log("Running statements just for trx ready to close")
-    const [ aTalliesOpen, accountsFlatOpen ] = tabulate(accountsMap,inputsComplete)
-    const statementOpen =  new Statement(aTalliesOpen,accountsFlatOpen)
-    statementOpen.runEverything(false,config.PATH_OPEN_REPORTS)
+    statement.runEverything(FILES.pathStmOpen(),accountsMap,inputsComplete)
+
+    //const [ aTalliesOpen, accountsFlatOpen ] = tabulate(accountsMap,inputsComplete)
+    //const statementOpen =  new Statement(aTalliesOpen,accountsFlatOpen)
+    //statementOpen.runEverything(false,config.PATH_OPEN_REPORTS)
 
     log("Running statements as they would appear after closing")
-    const allInputs = [...inputsComplete,...loadTransactionMap(true) ]
-    const [ aTalliesCombo, accountsFlatCombo ] = tabulate(accountsMap,allInputs)
-    let statement3 = new Statement(aTalliesCombo,accountsFlatCombo)
-    statement3.runEverything(false,config.PATH_COMBO_REPORTS)
+    const allInputs = [...inputsComplete,...loadTransactionMap(FILES.pathClosed()) ]
+    statement.runEverything(FILES.pathStmCombo(),accountsMap,allInputs)
+    
+    //const [ aTalliesCombo, accountsFlatCombo ] = tabulate(accountsMap,allInputs)
+    //let statement3 = new Statement(aTalliesCombo,accountsFlatCombo)
+    //statement3.runEverything(false,config.PATH_COMBO_REPORTS)
+
     logGroupEnd(msgRunStatements)
-    */
 }

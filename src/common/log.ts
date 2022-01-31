@@ -40,6 +40,9 @@ export const log = (...args) => console.log(...args)
 export const logBadNews = (msg:string) => {
     console.log(`${Bright}${FgRed}`,`Bad news: ${msg}`,Reset)
 }
+export const logWarn = (...args) => {
+    console.log(`${FgYellow}`,...args,Reset)
+}
 
 export const logConclusion = (...args) => {
     console.log(`${FgMagenta}`,...args,Reset)
