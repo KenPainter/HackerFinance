@@ -1,14 +1,17 @@
 import * as fs from 'fs'
 import * as path from 'path'
 
-import { AccountMap, Inputs } from "./schema"
-import { config } from './config'
-
-import { loadChartOfAccounts } from "./chartOfAccounts"
+import { AccountMap, Inputs } from "./common/schema"
 import { log, logBadNews, logGroup, logGroupEnd } from "./common/log"
-import { appendTransactionMap, loadTransactionMap, replaceTransactionMap } from "./transactionMap"
-import { tabulate } from "./tabulate"
+import { loadChartOfAccounts } from "./dataLayer/chartOfAccounts"
+import { Files } from './common/Files'
+
+import { appendTransactionMap, loadTransactionMap, replaceTransactionMap } from "./dataLayer/transactionMap"
 import { Statement } from "./Statement"
+
+
+const FILES = new Files()
+FILES.init()
 
 export function close() {
     const msgClose = "Moving complete transactions from open set to closed set"
@@ -16,7 +19,7 @@ export function close() {
 
     // load chart of accounts and open transactions
     const accountMap:AccountMap = loadChartOfAccounts()
-    const inputs:Inputs = loadTransactionMap()
+    const inputs:Inputs = loadTransactionMap(FILES.pathClosed())
     const [ inputsNoMove, inputsMove ] = inputs.reduce((acc,trx)=>{
         if(!(trx.crdAccount in accountMap) || !(trx.debAccount in accountMap)) {
             acc[0].push(trx)
@@ -36,43 +39,43 @@ export function close() {
     const msgMove = "Moving transactions"
     logGroup(msgMove)
     log("There are ",inputsMove.length,"transactions ready to move")
-    appendTransactionMap(inputsMove,true)
-    replaceTransactionMap(inputsNoMove)
+    appendTransactionMap(FILES.pathClosed(),inputsMove)
+    replaceTransactionMap(FILES.pathOpen(),inputsNoMove)
     logGroupEnd(msgMove)
 
     const msgStatements = "Running Statements on closed transactions"
     logGroup(msgStatements)
-    const closed = loadTransactionMap(true)
-    const [ aTallies, accountsFlat ] = tabulate(accountMap,closed)
-    const statementOpen =  new Statement(aTallies,accountsFlat)
-    statementOpen.runEverything(false,config.PATH_OPEN_REPORTS)
+    const statement = new Statement()
+    statement.runEverything(FILES.pathStmClosed(),accountMap,inputs)
     logGroupEnd(msgStatements)
 
-    writeFull(closed,accountMap)
+    writeFull(accountMap)
 
     logGroupEnd(msgClose)
 }
 
-function writeFull(inputs:Inputs,accountMap:AccountMap) {
+function writeFull(accountMap:AccountMap) {
     const msgFull = "Writing fully-specified transaction map"
     logGroup(msgFull)
+
+    const inputs = loadTransactionMap(FILES.pathClosed())
 
     const full = inputs.map(trx=>{
         return {
             date: trx.date,
-            debGroup: accountMap[trx.debAccount][0],
-            debSubgroup: accountMap[trx.debAccount][1],
+            debGroup: accountMap[trx.debAccount].group,
+            debSubgroup: accountMap[trx.debAccount].subgroup,
             debAccount: trx.debAccount,
             debAmount: trx.amount,
-            crdGroup: accountMap[trx.crdAccount][0],
-            crdSubGroup: accountMap[trx.crdAccount][1],
+            crdGroup: accountMap[trx.crdAccount].group,
+            crdSubGroup: accountMap[trx.crdAccount].subgroup,
             crdAccount: trx.crdAccount,
             description: trx.description,
             srcFile: trx.srcFile
         }
     }) 
 
-    const fileSpec = path.join(config.PATH_CLOSED_REPORTS,"fully-mapped-transactions.csv")
+    const fileSpec = path.join(FILES.pathClosed(),"fully-mapped-transactions.csv")
     const header=Object.keys(full[0]).join(',')
     const lines = full.map(trx=>Object.values(trx).join(','))
 

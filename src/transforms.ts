@@ -36,7 +36,7 @@
  * 
  */ 
 
-import { InputTransaction,Transform,Line } from './schema'
+import { InputTransaction,Transform,Line } from './common/schema'
 
 const dateFromMDY = (text:string):string => text.slice(-4) + text.slice(0,2) + text.slice(3,5)
 

@@ -1,5 +1,5 @@
 import { log } from "./common/log"
-import { Inputs, DescriptionMap } from "./schema"
+import { Inputs, DescriptionMap } from "./common/schema"
 
 export function match(inpTrxs:Inputs,descriptionMap:DescriptionMap):number {
     // we need a list of descriptions from longest to shortest
