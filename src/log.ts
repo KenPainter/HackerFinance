@@ -26,8 +26,7 @@ export const logTitle = (arg:string) => {
 }
 
 export const logConclusion = (...args) => {
-    console.log("")
-    console.log(chalk.magenta(SPACE,...args))
+    console.log(chalk.magenta(...args))
 }
 export const logBlank = () =>  console.log("")
 

@@ -7,8 +7,8 @@
  */
 // node imports
 import { log } from './src/log'
-import { processOpen } from './src/processOpen'
+import { close } from './src/close'
 
 log()
-processOpen()
+close()
 log()

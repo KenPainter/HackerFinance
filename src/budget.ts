@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import { config } from './config'
-import { logDetail } from './log'
+import { log } from './log'
 import { BudgetMap } from './schema'
 
 export function loadLatestBudget():BudgetMap {
@@ -12,7 +12,7 @@ export function loadLatestBudget():BudgetMap {
     }
 
     const fileName = candidates.sort().pop()
-    logDetail("Found budget ",fileName)
+    log("Found budget ",fileName)
     const fileSpec = path.join(config.PATH_MASTERS,fileName)
     const budgetItems = fs.readFileSync(fileSpec,'utf8')
         .split('\n')

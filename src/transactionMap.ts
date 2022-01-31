@@ -24,7 +24,7 @@ export function transactionMapCount(loadClosed:boolean=false):number {
 
 export function loadTransactionMap(loadClosed:boolean=false):Inputs {
     const fileSpec = !loadClosed ? config.FILE_OPEN_TRANSACTION_MAP : config.FILE_CLOSED_TRANSACTION_MAP
-    logDetail('Loading transaction map ',fileSpec)
+    log('Loading transaction map ',fileSpec)
 
     if(!fs.existsSync(fileSpec)) {
         return []
@@ -34,10 +34,10 @@ export function loadTransactionMap(loadClosed:boolean=false):Inputs {
         .split('\n')
         .slice(1)
         .filter(line=>line.length>0)
-    if(lines.length === 0) { 
-        return []
-    }
-    return lines.map(whole=>{
+    //if(lines.length === 0) { 
+    //    return []
+    //}
+    const retval = lines.map(whole=>{
             const line = whole.split(',')
             return {
                 crdAccount: line[0].trim(),
@@ -48,6 +48,8 @@ export function loadTransactionMap(loadClosed:boolean=false):Inputs {
                 srcFile: line[5].trim()
             }
         })
+    log("Loaded",retval.length,"transactions from open transaction map")
+    return retval
 }
 
 const HEADER = 'Credit Account,Debit Account,Date,Amount,Description,Source'
@@ -66,6 +68,17 @@ export function appendTransactionMap(trxs:Inputs,closedVersion:boolean=false) {
 export function replaceTransactionMap(trxs:Inputs) {
     // In replace mode we unconditionally replace the file
     logDetail('Overwriting transaction map ',config.FILE_OPEN_TRANSACTION_MAP)
+
+    // resort so mapped trx are at bottom
+    trxs.sort((a,b)=>{
+        if(a.crdAccount < b.crdAccount) return -1
+        if(a.crdAccount > b.crdAccount) return 1
+        if(a.date < b.date) return -1
+        if(a.date > b.date) return 1
+        if(a.description < b.description) return -1
+        return 1
+    })
+
     fs.writeFileSync(config.FILE_OPEN_TRANSACTION_MAP,HEADER)
     appendTransactionMap(trxs)
 }

@@ -38,7 +38,7 @@ export const config:Config = {
     FILE_OPEN_TRANSACTION_MAP: 'data/2-open-batch/transactionMap.csv',
     FILE_CLOSED_TRANSACTION_MAP: 'data/3-closed-batches/closed-transactionMap.csv',
 
-    FILE_OPEN_DESCRIPTION_MAP: 'data/2-open-batch/unUsedDescriptionMap.csv',
+    FILE_OPEN_DESCRIPTION_MAP: 'data/2-open-batch/open-descriptionMap.csv',
 
     // Masters
     PATH_MASTERS: 'data/0-masters/',

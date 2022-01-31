@@ -3,17 +3,17 @@ import * as fs from 'fs'
 import { AccountMap, BudgetMap  } from './schema'
 import { config } from './config';
 import { writeDebug } from './debug';
-import { logDetail, logWarnings } from './log'
+import { logDetail, log, logWarnings } from './log'
 import { loadLatestBudget } from './budget';
 
 // Note that checks should have already been run
 // before calling this function
 export function loadChartOfAccounts():AccountMap {
-    logDetail("Loading budget if available")
+    log("Loading chart of accounts",config.FILE_MASTER_COA)
+    log("Adding budget if available")
     const budgetMap:BudgetMap = loadLatestBudget()
     const getBudget = a => a in budgetMap ? budgetMap[a] : 0
 
-    logDetail("Loading chart of accounts: ",config.FILE_MASTER_COA)
     let accountMap:AccountMap = {}
     let warnings:Array<string> = []
     fs.readFileSync(config.FILE_MASTER_COA,'utf8')
@@ -64,15 +64,17 @@ export function loadChartOfAccounts():AccountMap {
 export function writeChartOfAccounts(chart:AccountMap,newAccounts:Array<string>) {
     const header = 'Group,Subgroup,Account\n'
     const newlines = newAccounts.map(act=>`,,${act}`)
-    const oldAccounts = Object.values(chart).sort((a,b)=>{
-        if(a[0] > b[0]) return 1
-        if(a[0] < b[0]) return -1
-        if(a[1] > b[1]) return 1
-        if(a[1] < b[1]) return -1
-        if(a[2] > b[2]) return 1
-        if(a[2] < b[2]) return -1
-
-    }).map(act=>act.join(','))
+    const oldAccounts = Object.values(chart)
+        // the slice removes the budget figure
+        .map(line=>line.slice(0,3))
+        .sort((a,b)=>{
+            if(a[0] > b[0]) return 1
+            if(a[0] < b[0]) return -1
+            if(a[1] > b[1]) return 1
+            if(a[1] < b[1]) return -1
+            if(a[2] > b[2]) return 1
+            if(a[2] < b[2]) return -1
+        }).map(act=>act.join(','))
     const accounts = [ ...newlines, ...oldAccounts]
 
     fs.writeFileSync(config.FILE_MASTER_COA,header + accounts.join('\n'))

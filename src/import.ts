@@ -15,6 +15,7 @@ import { config } from './config'
 // functional imports
 import { transforms } from './transforms'
 import { appendTransactionMap, transactionMapCount } from './transactionMap'
+import { processOpen } from './processOpen'
 
 export function importInputs() {
     // step 1, try to load new files
@@ -44,7 +45,7 @@ export function importInputs() {
     logGroupEnd(msg)
 
     // Step 3, process current open batch
-    //dosomething()
+    processOpen()
 }
 
 function loadFiles():[Inputs,Array<string>] {
