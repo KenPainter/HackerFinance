@@ -31,8 +31,6 @@ export function close() {
 
     if(inputsMove.length===0) {
         logBadNews("There are no complete transactions ready to close")
-        logGroupEnd(msgClose)
-        return;
     }
 
     // If still here, there are transactions to move
@@ -51,6 +49,7 @@ export function close() {
     logGroupEnd(msgStatements)
 
     writeFull(accountMap)
+    writeAccountDates([...inputs,...closed])
 
     logGroupEnd(msgClose)
 }
@@ -83,4 +82,23 @@ function writeFull(accountMap:AccountMap) {
     fs.writeFileSync(fileSpec,header + '\n' + lines.join('\n'))
 
     logGroupEnd(msgFull)
+}
+
+function writeAccountDates(inputs:Inputs) {
+    let datesByAccount:{[key:string]:string} = {}
+    for(const trx of inputs) {
+        if(trx.srcFile.startsWith('manual')) {
+            continue;
+        }
+        const account = trx.srcFile.split('-')[1]
+        if(!(account in datesByAccount)) {
+            datesByAccount[account] = trx.date
+            continue;
+        }
+        if(trx.date > datesByAccount[account]) {
+            datesByAccount[account] = trx.date
+        }
+    }
+    const fileSpec = path.join(FILES.pathOpen(),"Imported-Dates.json")
+    fs.writeFileSync(fileSpec,JSON.stringify(datesByAccount,null,2))
 }
